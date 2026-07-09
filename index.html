@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MapShaper - Game Map Layout Definer</title>
+  <!-- Google Fonts for modern typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header & Toolbar -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="logo">🗺️</span>
+        <div class="brand-text">
+          <h1>MapShaper</h1>
+          <p>Game Map Layout Definer</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="tool-group">
+          <span class="group-label">Tools</span>
+          <button id="tool-select" class="btn tool-btn active" data-tool="select">
+            <span class="icon">🖱️</span> Select & Move
+          </button>
+          <button id="tool-platform" class="btn tool-btn" data-tool="platform">
+            <span class="icon">🧱</span> Platform
+          </button>
+          <button id="tool-tunnel" class="btn tool-btn" data-tool="tunnel">
+            <span class="icon">🌀</span> Tunnel
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="tool-group">
+          <span class="group-label">Actions</span>
+          <button id="btn-load-demo" class="btn secondary-btn">
+            <span class="icon">🖼️</span> Load Demo Map
+          </button>
+          <button id="btn-clear" class="btn danger-btn">
+            <span class="icon">🗑️</span> Clear All
+          </button>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-copy-json" class="btn primary-btn">
+          <span class="icon">📋</span> Copy JSON
+        </button>
+        <button id="btn-download-json" class="btn primary-btn">
+          <span class="icon">💾</span> Export Map
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Left Column: Visual Editor -->
+      <section class="editor-column">
+        <div class="panel-header">
+          <h2>Visual Editor</h2>
+          <span class="panel-desc">Drag to draw shapes. Click to edit or delete.</span>
+        </div>
+
+        <div class="canvas-container-outer" id="drop-zone">
+          <!-- Drag & Drop overlay -->
+          <div class="drop-prompt" id="drop-prompt">
+            <div class="upload-icon">📤</div>
+            <h3>Drag & Drop Map Image</h3>
+            <p>PNG, JPG, or SVG formats supported</p>
+            <span class="or-divider">or</span>
+            <label for="file-input" class="file-label">Browse Files</label>
+            <input type="file" id="file-input" accept="image/*" class="file-input-hidden">
+          </div>
+
+          <!-- Canvas Workspace -->
+          <div class="workspace-wrapper" id="workspace-wrapper" style="display: none;">
+            <img id="map-img" src="" alt="Game Map Background">
+            <canvas id="paint-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Selected Object Properties panel (floats or stays fixed at the bottom of the editor) -->
+        <div class="properties-panel" id="properties-panel" style="display: none;">
+          <div class="properties-header">
+            <h3>Object Properties</h3>
+            <button id="close-properties" class="close-btn">&times;</button>
+          </div>
+          <div class="properties-body">
+            <div class="prop-row">
+              <span class="prop-label">Type:</span>
+              <span class="prop-val badge" id="prop-type">-</span>
+            </div>
+            <div class="prop-row" id="prop-collision-container">
+              <span class="prop-label">Collision:</span>
+              <span class="prop-val" id="prop-collision">true</span>
+            </div>
+            <div class="prop-row" id="prop-tunnel-container" style="display: none;">
+              <label class="prop-label" for="prop-tunnel-id">Tunnel ID:</label>
+              <input type="number" id="prop-tunnel-id" class="prop-input" value="0">
+            </div>
+            <div class="prop-row">
+              <span class="prop-label">Coords:</span>
+              <span class="prop-val monospace" id="prop-coords">x1: 0, y1: 0, x2: 0, y2: 0</span>
+            </div>
+            <button id="btn-delete-object" class="btn danger-btn full-width">
+              <span class="icon">🗑️</span> Delete Object
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: JSON Editor -->
+      <section class="json-column">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>map.json</h2>
+            <span id="json-status" class="status-badge valid">Valid</span>
+          </div>
+          <div class="panel-header-right">
+            <button id="btn-format-json" class="btn-text" title="Reformat JSON">✨ Format</button>
+          </div>
+        </div>
+
+        <div class="json-editor-container">
+          <textarea id="json-textarea" spellcheck="false" autocomplete="off" placeholder="{\n  &quot;objects&quot;: []\n}"></textarea>
+        </div>
+
+        <div class="instructions-panel">
+          <h3>Keyboard & Mouse Controls</h3>
+          <ul>
+            <li><strong>Draw:</strong> Drag and release mouse to define rectangles.</li>
+            <li><strong>Select:</strong> Click on an existing shape to view/edit properties.</li>
+            <li><strong>Delete:</strong> Press <kbd>Delete</kbd> or <kbd>Backspace</kbd> when a shape is selected.</li>
+            <li><strong>Cancel drawing:</strong> Press <kbd>Escape</kbd>.</li>
+            <li><strong>Real-time Sync:</strong> Edit coordinates directly in the JSON box to update shapes.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
