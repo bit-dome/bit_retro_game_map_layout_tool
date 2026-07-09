@@ -32,7 +32,6 @@ const ctx = paintCanvas.getContext('2d');
 const toolSelect = document.getElementById('tool-select');
 const toolPlatform = document.getElementById('tool-platform');
 const toolTunnel = document.getElementById('tool-tunnel');
-const btnLoadDemo = document.getElementById('btn-load-demo');
 const btnClear = document.getElementById('btn-clear');
 const btnCopyJson = document.getElementById('btn-copy-json');
 const btnDownloadJson = document.getElementById('btn-download-json');
@@ -66,7 +65,6 @@ function setupEventListeners() {
   toolTunnel.addEventListener('click', () => setTool('tunnel'));
   
   // Action Buttons
-  btnLoadDemo.addEventListener('click', loadDemoMap);
   btnClear.addEventListener('click', clearAllObjects);
   btnCopyJson.addEventListener('click', copyJSONToClipboard);
   btnDownloadJson.addEventListener('click', downloadJSONFile);
@@ -160,11 +158,6 @@ function resizeCanvas() {
   paintCanvas.width = displayWidth;
   paintCanvas.height = displayHeight;
   draw();
-}
-
-// Load Demo Image (sample_map.png in current workspace)
-function loadDemoMap() {
-  loadImage('sample_map.png');
 }
 
 // Clear all objects
