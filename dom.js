@@ -1,0 +1,34 @@
+export function getDOM() {
+  const paintCanvas = document.getElementById('paint-canvas');
+
+  return {
+    dropZone: document.getElementById('drop-zone'),
+    dropPrompt: document.getElementById('drop-prompt'),
+    workspaceWrapper: document.getElementById('workspace-wrapper'),
+    mapImg: document.getElementById('map-img'),
+    paintCanvas,
+    ctx: paintCanvas.getContext('2d'),
+
+    toolSelect: document.getElementById('tool-select'),
+    toolPlatform: document.getElementById('tool-platform'),
+    toolTunnel: document.getElementById('tool-tunnel'),
+    btnClear: document.getElementById('btn-clear'),
+    btnCopyJson: document.getElementById('btn-copy-json'),
+    btnDownloadJson: document.getElementById('btn-download-json'),
+    btnFormatJson: document.getElementById('btn-format-json'),
+    fileInput: document.getElementById('file-input'),
+
+    jsonTextarea: document.getElementById('json-textarea'),
+    jsonStatus: document.getElementById('json-status'),
+
+    propertiesPanel: document.getElementById('properties-panel'),
+    closeProperties: document.getElementById('close-properties'),
+    propType: document.getElementById('prop-type'),
+    propCollisionContainer: document.getElementById('prop-collision-container'),
+    propCollision: document.getElementById('prop-collision'),
+    propTunnelContainer: document.getElementById('prop-tunnel-container'),
+    propTunnelId: document.getElementById('prop-tunnel-id'),
+    propCoords: document.getElementById('prop-coords'),
+    btnDeleteObject: document.getElementById('btn-delete-object')
+  };
+}
