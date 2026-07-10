@@ -3,6 +3,8 @@ export function createKeyboard(state, dom, uiActions, draw) {
     if (e.key === 'Escape') {
       if (state.isDrawing) {
         state.isDrawing = false;
+        state.polygonPoints = [];
+        state.polygonPreviewPoint = null;
         draw();
       } else {
         uiActions.hideProperties();

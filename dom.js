@@ -11,6 +11,7 @@ export function getDOM() {
 
     toolSelect: document.getElementById('tool-select'),
     toolPlatform: document.getElementById('tool-platform'),
+    toolPolygon: document.getElementById('tool-polygon'),
     toolTunnel: document.getElementById('tool-tunnel'),
     btnClear: document.getElementById('btn-clear'),
     btnCopyJson: document.getElementById('btn-copy-json'),

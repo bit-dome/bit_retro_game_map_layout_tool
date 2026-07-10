@@ -26,6 +26,7 @@ const keyboard = createKeyboard(state, dom, uiActions, draw);
 function setupEventListeners() {
   dom.toolSelect.addEventListener('click', () => uiActions.setTool('select'));
   dom.toolPlatform.addEventListener('click', () => uiActions.setTool('platform'));
+  dom.toolPolygon.addEventListener('click', () => uiActions.setTool('polygon'));
   dom.toolTunnel.addEventListener('click', () => uiActions.setTool('tunnel'));
 
   dom.btnClear.addEventListener('click', uiActions.clearAllObjects);
@@ -40,6 +41,7 @@ function setupEventListeners() {
 
   dom.paintCanvas.addEventListener('mousedown', mouseInteraction.onMouseDown);
   dom.paintCanvas.addEventListener('mousemove', mouseInteraction.onMouseMove);
+  dom.paintCanvas.addEventListener('contextmenu', mouseInteraction.onContextMenu);
   window.addEventListener('mouseup', mouseInteraction.onMouseUp);
 
   dom.closeProperties.addEventListener('click', uiActions.hideProperties);

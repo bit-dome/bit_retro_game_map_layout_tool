@@ -34,6 +34,25 @@ export function buildObjectFromDrag(state, canvasWidth, canvasHeight) {
   return newObject;
 }
 
+export function buildPlatformPolygon(points, canvasWidth, canvasHeight) {
+  if (!Array.isArray(points) || points.length < 3) return null;
+
+  const normalizedPoints = points.map((pt) => {
+    const x = Math.max(0, Math.min(1, pt.x / canvasWidth));
+    const y = Math.max(0, Math.min(1, pt.y / canvasHeight));
+    return {
+      x: parseFloat(x.toFixed(4)),
+      y: parseFloat(y.toFixed(4))
+    };
+  });
+
+  return {
+    type: 'platform',
+    collision: true,
+    polygon: normalizedPoints
+  };
+}
+
 export function normalizeSelectedRectangle(state) {
   if (state.selectedObjectIndex === -1) return;
 
@@ -52,4 +71,16 @@ export function normalizeSelectedRectangle(state) {
     x2: parseFloat(rx2.toFixed(4)),
     y2: parseFloat(ry2.toFixed(4))
   };
+}
+
+export function normalizeSelectedPolygon(state) {
+  if (state.selectedObjectIndex === -1) return;
+
+  const obj = state.objects[state.selectedObjectIndex];
+  if (!obj || !Array.isArray(obj.polygon)) return;
+
+  obj.polygon = obj.polygon.map((pt) => ({
+    x: parseFloat((Math.max(0, Math.min(1, Number(pt.x) || 0))).toFixed(4)),
+    y: parseFloat((Math.max(0, Math.min(1, Number(pt.y) || 0))).toFixed(4))
+  }));
 }

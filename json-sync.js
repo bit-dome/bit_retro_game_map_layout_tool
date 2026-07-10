@@ -33,7 +33,12 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
             type: obj.type || 'platform'
           };
 
-          if (obj.rectangle) {
+          if (Array.isArray(obj.polygon) && obj.polygon.length >= 3) {
+            cleaned.polygon = obj.polygon.map((pt) => ({
+              x: Number(pt.x) || 0,
+              y: Number(pt.y) || 0
+            }));
+          } else if (obj.rectangle) {
             cleaned.rectangle = {
               x1: Number(obj.rectangle.x1) || 0,
               y1: Number(obj.rectangle.y1) || 0,
