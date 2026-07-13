@@ -21,6 +21,7 @@ export function getDOM() {
     btnFormatJson: document.getElementById('btn-format-json'),
     fileInput: document.getElementById('file-input'),
 
+    jsonDropZone: document.getElementById('json-drop-zone'),
     jsonTextarea: document.getElementById('json-textarea'),
     jsonStatus: document.getElementById('json-status'),
 

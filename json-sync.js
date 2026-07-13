@@ -16,6 +16,10 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
     setJSONStatus(true);
   }
 
+  function setJSONDropState(isActive) {
+    dom.jsonDropZone.classList.toggle('drag-over', isActive);
+  }
+
   function onJSONInput() {
     const val = dom.jsonTextarea.value.trim();
     if (val === '') {
@@ -134,11 +138,55 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
     downloadAnchor.remove();
   }
 
+  function onJSONDragOver(e) {
+    e.preventDefault();
+    setJSONDropState(true);
+  }
+
+  function onJSONDragLeave(e) {
+    e.preventDefault();
+
+    if (!dom.jsonDropZone.contains(e.relatedTarget)) {
+      setJSONDropState(false);
+    }
+  }
+
+  function onJSONDropFile(e) {
+    e.preventDefault();
+    setJSONDropState(false);
+
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const [file] = files;
+    const isJsonFile = file.type === 'application/json' || file.name.toLowerCase().endsWith('.json');
+
+    if (!isJsonFile) {
+      setJSONStatus(false, 'Please drop a .json file.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      dom.jsonTextarea.value = typeof event.target.result === 'string' ? event.target.result : '';
+      onJSONInput();
+    };
+    reader.onerror = () => {
+      setJSONStatus(false, 'Unable to read dropped file.');
+    };
+    reader.readAsText(file);
+  }
+
   return {
     updateJSONTextarea,
     onJSONInput,
     formatJSONText,
     copyJSONToClipboard,
-    downloadJSONFile
+    downloadJSONFile,
+    onJSONDragOver,
+    onJSONDragLeave,
+    onJSONDropFile
   };
 }

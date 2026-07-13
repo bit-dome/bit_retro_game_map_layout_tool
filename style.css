@@ -556,6 +556,11 @@ body {
   background-color: #080c14;
 }
 
+.json-editor-container.drag-over {
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
 .json-editor-container:focus-within {
   border-color: var(--border-color-focus);
 }

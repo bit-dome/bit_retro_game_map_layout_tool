@@ -50,6 +50,9 @@ function setupEventListeners() {
   dom.btnDeleteObject.addEventListener('click', uiActions.deleteSelectedObject);
   dom.propTunnelId.addEventListener('input', uiActions.onTunnelIdChange);
 
+  dom.jsonDropZone.addEventListener('dragover', jsonSync.onJSONDragOver);
+  dom.jsonDropZone.addEventListener('dragleave', jsonSync.onJSONDragLeave);
+  dom.jsonDropZone.addEventListener('drop', jsonSync.onJSONDropFile);
   dom.jsonTextarea.addEventListener('input', jsonSync.onJSONInput);
   window.addEventListener('resize', imageLoader.resizeCanvas);
   document.addEventListener('keydown', keyboard.onKeyDown);
