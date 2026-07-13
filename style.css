@@ -18,6 +18,12 @@
   /* Tool Specific Colors */
   --color-platform: #ff9f1c;
   --color-platform-rgb: 255, 159, 28;
+  --color-polygon: #2dd4bf;
+  --color-polygon-rgb: 45, 212, 191;
+  --color-poly-floor-line: #f43f5e;
+  --color-poly-floor-line-rgb: 244, 63, 94;
+  --color-spawn-point: #ef4444;
+  --color-spawn-point-rgb: 239, 68, 68;
   --color-tunnel: #9d4edd;
   --color-tunnel-rgb: 157, 78, 221;
   
@@ -190,6 +196,30 @@ body {
   border-color: var(--color-tunnel);
   color: var(--color-tunnel);
   box-shadow: 0 0 10px rgba(157, 78, 221, 0.2);
+  font-weight: 600;
+}
+
+.tool-btn.active[data-tool="polygon"] {
+  background-color: rgba(45, 212, 191, 0.15);
+  border-color: var(--color-polygon);
+  color: var(--color-polygon);
+  box-shadow: 0 0 10px rgba(45, 212, 191, 0.2);
+  font-weight: 600;
+}
+
+.tool-btn.active[data-tool="poly_floor_line"] {
+  background-color: rgba(244, 63, 94, 0.15);
+  border-color: var(--color-poly-floor-line);
+  color: var(--color-poly-floor-line);
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.2);
+  font-weight: 600;
+}
+
+.tool-btn.active[data-tool="spawn_point"] {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: var(--color-spawn-point);
+  color: #fca5a5;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
   font-weight: 600;
 }
 
@@ -474,6 +504,18 @@ body {
   background-color: rgba(157, 78, 221, 0.2);
   color: #d8b4fe;
   border: 1px solid rgba(157, 78, 221, 0.4);
+}
+
+.badge.poly_floor_line {
+  background-color: rgba(244, 63, 94, 0.2);
+  color: #fda4af;
+  border: 1px solid rgba(244, 63, 94, 0.4);
+}
+
+.badge.spawn_point {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
 .prop-input {

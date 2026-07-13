@@ -27,7 +27,9 @@ function setupEventListeners() {
   dom.toolSelect.addEventListener('click', () => uiActions.setTool('select'));
   dom.toolPlatform.addEventListener('click', () => uiActions.setTool('platform'));
   dom.toolPolygon.addEventListener('click', () => uiActions.setTool('polygon'));
+  dom.toolPolyFloorLine.addEventListener('click', () => uiActions.setTool('poly_floor_line'));
   dom.toolTunnel.addEventListener('click', () => uiActions.setTool('tunnel'));
+  dom.toolSpawnPoint.addEventListener('click', () => uiActions.setTool('spawn_point'));
 
   dom.btnClear.addEventListener('click', uiActions.clearAllObjects);
   dom.btnCopyJson.addEventListener('click', jsonSync.copyJSONToClipboard);

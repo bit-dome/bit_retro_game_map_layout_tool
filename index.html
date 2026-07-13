@@ -34,8 +34,14 @@
           <button id="tool-polygon" class="btn tool-btn" data-tool="polygon">
             <span class="icon">📐</span> Polygon Floor
           </button>
+          <button id="tool-poly-floor-line" class="btn tool-btn" data-tool="poly_floor_line">
+            <span class="icon">〰️</span> Poly Floor Line
+          </button>
           <button id="tool-tunnel" class="btn tool-btn" data-tool="tunnel">
             <span class="icon">🌀</span> Tunnel
+          </button>
+          <button id="tool-spawn-point" class="btn tool-btn" data-tool="spawn_point">
+            <span class="icon">🎯</span> Spawn Point
           </button>
         </div>
 
@@ -138,10 +144,12 @@
           <ul>
             <li><strong>Draw rectangle:</strong> Use Platform or Tunnel, then drag and release.</li>
             <li><strong>Draw slope floor:</strong> Use Polygon Floor, click points, then click first point to finish.</li>
+            <li><strong>Draw one-way floor line:</strong> Use Poly Floor Line, click points, right-click or double-click to finish.</li>
+            <li><strong>Place spawn point:</strong> Use Spawn Point, then click once to place a red crosshair marker.</li>
             <li><strong>Select:</strong> Click on an existing shape to view/edit properties.</li>
             <li><strong>Delete:</strong> Press <kbd>Delete</kbd> or <kbd>Backspace</kbd> when a shape is selected.</li>
             <li><strong>Cancel drawing:</strong> Press <kbd>Escape</kbd>.</li>
-            <li><strong>Real-time Sync:</strong> Edit coordinates directly in the JSON box to update shapes.</li>
+            <li><strong>Real-time Sync:</strong> Edit coordinates directly in the JSON box to update shapes. Change spawn names by editing each spawn point's <code>name</code> field in JSON.</li>
           </ul>
         </div>
       </section>

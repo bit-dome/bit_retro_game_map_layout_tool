@@ -33,8 +33,18 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
             type: obj.type || 'platform'
           };
 
-          if (Array.isArray(obj.polygon) && obj.polygon.length >= 3) {
+          if (cleaned.type === 'spawn_point' && obj.coord) {
+            cleaned.coord = {
+              x: Number(obj.coord.x) || 0,
+              y: Number(obj.coord.y) || 0
+            };
+          } else if (Array.isArray(obj.polygon) && obj.polygon.length >= 3) {
             cleaned.polygon = obj.polygon.map((pt) => ({
+              x: Number(pt.x) || 0,
+              y: Number(pt.y) || 0
+            }));
+          } else if (Array.isArray(obj.polyline) && obj.polyline.length >= 2) {
+            cleaned.polyline = obj.polyline.map((pt) => ({
               x: Number(pt.x) || 0,
               y: Number(pt.y) || 0
             }));
@@ -46,13 +56,27 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
               y2: Number(obj.rectangle.y2) || 0
             };
           } else {
-            cleaned.rectangle = { x1: 0, y1: 0, x2: 0.1, y2: 0.1 };
+            if (cleaned.type === 'spawn_point') {
+              cleaned.coord = { x: 0, y: 0 };
+            } else if (cleaned.type === 'poly_floor_line') {
+              cleaned.polyline = [
+                { x: 0, y: 0 },
+                { x: 0.1, y: 0 }
+              ];
+            } else {
+              cleaned.rectangle = { x1: 0, y1: 0, x2: 0.1, y2: 0.1 };
+            }
           }
 
           if (cleaned.type === 'platform') {
             cleaned.collision = obj.collision !== undefined ? obj.collision : true;
+          } else if (cleaned.type === 'poly_floor_line') {
+            cleaned.collision = obj.collision !== undefined ? obj.collision : true;
+            cleaned.one_way = obj.one_way !== undefined ? Boolean(obj.one_way) : true;
           } else if (cleaned.type === 'tunnel') {
             cleaned.tunnel_id = obj.tunnel_id !== undefined ? Number(obj.tunnel_id) : 0;
+          } else if (cleaned.type === 'spawn_point') {
+            cleaned.name = typeof obj.name === 'string' && obj.name.trim() ? obj.name.trim() : 'coin';
           }
 
           return cleaned;

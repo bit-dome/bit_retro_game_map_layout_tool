@@ -34,6 +34,20 @@ export function buildObjectFromDrag(state, canvasWidth, canvasHeight) {
   return newObject;
 }
 
+export function buildSpawnPoint(canvasX, canvasY, canvasWidth, canvasHeight) {
+  const x = Math.max(0, Math.min(1, canvasX / canvasWidth));
+  const y = Math.max(0, Math.min(1, canvasY / canvasHeight));
+
+  return {
+    type: 'spawn_point',
+    name: 'coin',
+    coord: {
+      x: parseFloat(x.toFixed(4)),
+      y: parseFloat(y.toFixed(4))
+    }
+  };
+}
+
 export function buildPlatformPolygon(points, canvasWidth, canvasHeight) {
   if (!Array.isArray(points) || points.length < 3) return null;
 
@@ -50,6 +64,26 @@ export function buildPlatformPolygon(points, canvasWidth, canvasHeight) {
     type: 'platform',
     collision: true,
     polygon: normalizedPoints
+  };
+}
+
+export function buildPolyFloorLine(points, canvasWidth, canvasHeight) {
+  if (!Array.isArray(points) || points.length < 2) return null;
+
+  const normalizedPoints = points.map((pt) => {
+    const x = Math.max(0, Math.min(1, pt.x / canvasWidth));
+    const y = Math.max(0, Math.min(1, pt.y / canvasHeight));
+    return {
+      x: parseFloat(x.toFixed(4)),
+      y: parseFloat(y.toFixed(4))
+    };
+  });
+
+  return {
+    type: 'poly_floor_line',
+    collision: true,
+    one_way: true,
+    polyline: normalizedPoints
   };
 }
 
@@ -83,4 +117,28 @@ export function normalizeSelectedPolygon(state) {
     x: parseFloat((Math.max(0, Math.min(1, Number(pt.x) || 0))).toFixed(4)),
     y: parseFloat((Math.max(0, Math.min(1, Number(pt.y) || 0))).toFixed(4))
   }));
+}
+
+export function normalizeSelectedPolyline(state) {
+  if (state.selectedObjectIndex === -1) return;
+
+  const obj = state.objects[state.selectedObjectIndex];
+  if (!obj || !Array.isArray(obj.polyline)) return;
+
+  obj.polyline = obj.polyline.map((pt) => ({
+    x: parseFloat((Math.max(0, Math.min(1, Number(pt.x) || 0))).toFixed(4)),
+    y: parseFloat((Math.max(0, Math.min(1, Number(pt.y) || 0))).toFixed(4))
+  }));
+}
+
+export function normalizeSelectedPoint(state) {
+  if (state.selectedObjectIndex === -1) return;
+
+  const obj = state.objects[state.selectedObjectIndex];
+  if (!obj || !obj.coord) return;
+
+  obj.coord = {
+    x: parseFloat((Math.max(0, Math.min(1, Number(obj.coord.x) || 0))).toFixed(4)),
+    y: parseFloat((Math.max(0, Math.min(1, Number(obj.coord.y) || 0))).toFixed(4))
+  };
 }

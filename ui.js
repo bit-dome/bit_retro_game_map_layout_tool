@@ -1,6 +1,8 @@
 export function createUI(state, dom, draw, callbacks) {
   function setTool(toolName) {
-    if (state.activeTool === 'polygon' && toolName !== 'polygon' && state.isDrawing) {
+    const isPointDrawingTool = state.activeTool === 'polygon' || state.activeTool === 'poly_floor_line';
+
+    if (isPointDrawingTool && toolName !== state.activeTool && state.isDrawing) {
       state.isDrawing = false;
       state.polygonPoints = [];
       state.polygonPreviewPoint = null;
@@ -11,7 +13,9 @@ export function createUI(state, dom, draw, callbacks) {
     dom.toolSelect.classList.toggle('active', toolName === 'select');
     dom.toolPlatform.classList.toggle('active', toolName === 'platform');
     dom.toolPolygon.classList.toggle('active', toolName === 'polygon');
+    dom.toolPolyFloorLine.classList.toggle('active', toolName === 'poly_floor_line');
     dom.toolTunnel.classList.toggle('active', toolName === 'tunnel');
+    dom.toolSpawnPoint.classList.toggle('active', toolName === 'spawn_point');
 
     dom.paintCanvas.style.cursor = toolName === 'select' ? 'default' : 'crosshair';
   }
@@ -37,9 +41,19 @@ export function createUI(state, dom, draw, callbacks) {
       const x2 = Math.max(...xs);
       const y2 = Math.max(...ys);
       dom.propCoords.textContent = `polygon ${obj.polygon.length} pts | x1: ${x1.toFixed(4)}, y1: ${y1.toFixed(4)}, x2: ${x2.toFixed(4)}, y2: ${y2.toFixed(4)}`;
+    } else if (Array.isArray(obj.polyline) && obj.polyline.length > 0) {
+      const xs = obj.polyline.map((pt) => Number(pt.x) || 0);
+      const ys = obj.polyline.map((pt) => Number(pt.y) || 0);
+      const x1 = Math.min(...xs);
+      const y1 = Math.min(...ys);
+      const x2 = Math.max(...xs);
+      const y2 = Math.max(...ys);
+      dom.propCoords.textContent = `line ${obj.polyline.length} pts | x1: ${x1.toFixed(4)}, y1: ${y1.toFixed(4)}, x2: ${x2.toFixed(4)}, y2: ${y2.toFixed(4)}`;
+    } else if (obj.coord) {
+      dom.propCoords.textContent = `x: ${(Number(obj.coord.x) || 0).toFixed(4)}, y: ${(Number(obj.coord.y) || 0).toFixed(4)}`;
     }
 
-    if (obj.type === 'platform') {
+    if (obj.type === 'platform' || obj.type === 'poly_floor_line') {
       dom.propCollisionContainer.style.display = 'flex';
       dom.propTunnelContainer.style.display = 'none';
       dom.propCollision.textContent = String(obj.collision);
@@ -47,6 +61,9 @@ export function createUI(state, dom, draw, callbacks) {
       dom.propCollisionContainer.style.display = 'none';
       dom.propTunnelContainer.style.display = 'flex';
       dom.propTunnelId.value = obj.tunnel_id;
+    } else {
+      dom.propCollisionContainer.style.display = 'none';
+      dom.propTunnelContainer.style.display = 'none';
     }
   }
 
