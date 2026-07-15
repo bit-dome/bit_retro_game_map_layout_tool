@@ -641,6 +641,7 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
     onMouseDown,
     onMouseMove,
     onMouseUp,
-    onContextMenu
+    onContextMenu,
+    finalizePolygonDrawing
   };
 }

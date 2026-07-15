@@ -21,7 +21,7 @@ callbacks.updateJSONTextarea = jsonSync.updateJSONTextarea;
 
 const imageLoader = createImageLoader(state, dom, draw, uiActions);
 const mouseInteraction = createMouseInteraction(state, dom, draw, uiActions, jsonSync.updateJSONTextarea);
-const keyboard = createKeyboard(state, dom, uiActions, draw);
+const keyboard = createKeyboard(state, dom, uiActions, draw, mouseInteraction.finalizePolygonDrawing);
 
 function setupEventListeners() {
   dom.toolSelect.addEventListener('click', () => uiActions.setTool('select'));

@@ -27,7 +27,7 @@ http://localhost:5500
 - Tunnel: drag to draw rectangle tunnel.
 - Spawn Point: click once to place a spawn marker stored as `{ type: "spawn_point", name, coord }`.
 - Polygon Floor: click to add polygon points, click first point or right-click to finish.
-- Poly Floor Line: click to add one-way floor line points, double-click or right-click to finish.
+- Poly Floor Line: click to add one-way floor line points, then press Enter, double-click, or right-click to finish.
 
 ## Polygon editing
 

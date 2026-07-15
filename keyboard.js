@@ -1,5 +1,11 @@
-export function createKeyboard(state, dom, uiActions, draw) {
+export function createKeyboard(state, dom, uiActions, draw, finalizePolygonDrawing) {
   function onKeyDown(e) {
+    if (e.key === 'Enter' && state.activeTool === 'poly_floor_line' && state.isDrawing) {
+      e.preventDefault();
+      finalizePolygonDrawing();
+      return;
+    }
+
     if (e.key === 'Escape') {
       if (state.isDrawing) {
         state.isDrawing = false;
