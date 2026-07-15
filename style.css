@@ -18,6 +18,8 @@
   /* Tool Specific Colors */
   --color-platform: #ff9f1c;
   --color-platform-rgb: 255, 159, 28;
+  --color-area: #38bdf8;
+  --color-area-rgb: 56, 189, 248;
   --color-polygon: #2dd4bf;
   --color-polygon-rgb: 45, 212, 191;
   --color-poly-floor-line: #f43f5e;
@@ -188,6 +190,14 @@ body {
   border-color: var(--color-platform);
   color: var(--color-platform);
   box-shadow: 0 0 10px rgba(255, 159, 28, 0.2);
+  font-weight: 600;
+}
+
+.tool-btn.active[data-tool="area"] {
+  background-color: rgba(56, 189, 248, 0.15);
+  border-color: var(--color-area);
+  color: var(--color-area);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
   font-weight: 600;
 }
 
@@ -500,6 +510,12 @@ body {
   border: 1px solid rgba(255, 159, 28, 0.4);
 }
 
+.badge.area {
+  background-color: rgba(56, 189, 248, 0.2);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
 .badge.tunnel {
   background-color: rgba(157, 78, 221, 0.2);
   color: #d8b4fe;
@@ -533,6 +549,11 @@ body {
 .prop-input:focus {
   outline: none;
   border-color: var(--color-tunnel);
+}
+
+#prop-name {
+  width: 160px;
+  text-align: left;
 }
 
 .monospace {

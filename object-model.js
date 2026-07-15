@@ -21,6 +21,8 @@ export function buildObjectFromDrag(state, canvasWidth, canvasHeight) {
 
   if (state.activeTool === 'platform') {
     newObject.collision = true;
+  } else if (state.activeTool === 'area') {
+    newObject.name = 'paper_station';
   } else if (state.activeTool === 'tunnel') {
     let maxId = 0;
     state.objects.forEach((obj) => {

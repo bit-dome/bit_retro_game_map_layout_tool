@@ -74,6 +74,8 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
 
           if (cleaned.type === 'platform') {
             cleaned.collision = obj.collision !== undefined ? obj.collision : true;
+          } else if (cleaned.type === 'area') {
+            cleaned.name = typeof obj.name === 'string' && obj.name.trim() ? obj.name.trim() : 'paper_station';
           } else if (cleaned.type === 'poly_floor_line') {
             cleaned.collision = obj.collision !== undefined ? obj.collision : true;
             cleaned.one_way = obj.one_way !== undefined ? Boolean(obj.one_way) : true;

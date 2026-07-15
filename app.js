@@ -26,6 +26,7 @@ const keyboard = createKeyboard(state, dom, uiActions, draw);
 function setupEventListeners() {
   dom.toolSelect.addEventListener('click', () => uiActions.setTool('select'));
   dom.toolPlatform.addEventListener('click', () => uiActions.setTool('platform'));
+  dom.toolArea.addEventListener('click', () => uiActions.setTool('area'));
   dom.toolPolygon.addEventListener('click', () => uiActions.setTool('polygon'));
   dom.toolPolyFloorLine.addEventListener('click', () => uiActions.setTool('poly_floor_line'));
   dom.toolTunnel.addEventListener('click', () => uiActions.setTool('tunnel'));
@@ -48,6 +49,7 @@ function setupEventListeners() {
 
   dom.closeProperties.addEventListener('click', uiActions.hideProperties);
   dom.btnDeleteObject.addEventListener('click', uiActions.deleteSelectedObject);
+  dom.propName.addEventListener('input', uiActions.onNameChange);
   dom.propTunnelId.addEventListener('input', uiActions.onTunnelIdChange);
 
   dom.jsonDropZone.addEventListener('dragover', jsonSync.onJSONDragOver);

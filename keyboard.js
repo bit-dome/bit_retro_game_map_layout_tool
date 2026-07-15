@@ -13,7 +13,7 @@ export function createKeyboard(state, dom, uiActions, draw) {
 
     if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedObjectIndex !== -1) {
       const activeElem = document.activeElement;
-      if (activeElem !== dom.jsonTextarea && activeElem !== dom.propTunnelId) {
+      if (activeElem !== dom.jsonTextarea && activeElem !== dom.propTunnelId && activeElem !== dom.propName) {
         uiActions.deleteSelectedObject();
       }
     }

@@ -6,6 +6,10 @@ export function createCanvasRenderer(state, dom) {
         color: styles.getPropertyValue('--color-platform').trim(),
         rgb: styles.getPropertyValue('--color-platform-rgb').trim()
       },
+      area: {
+        color: styles.getPropertyValue('--color-area').trim(),
+        rgb: styles.getPropertyValue('--color-area-rgb').trim()
+      },
       polygon: {
         color: styles.getPropertyValue('--color-polygon').trim(),
         rgb: styles.getPropertyValue('--color-polygon-rgb').trim()
@@ -33,6 +37,13 @@ export function createCanvasRenderer(state, dom) {
       };
     }
 
+    if (obj.type === 'area') {
+      return {
+        colorVar: palette.area.color,
+        colorRgbVar: palette.area.rgb
+      };
+    }
+
     if (obj.type === 'tunnel') {
       return {
         colorVar: palette.tunnel.color,
@@ -54,6 +65,10 @@ export function createCanvasRenderer(state, dom) {
   }
 
   function getLabelText(obj, hasPolygon) {
+    if (obj.type === 'area') {
+      return obj.name || 'paper_station';
+    }
+
     if (obj.type !== 'tunnel') return null;
 
     return `Tunnel (ID: ${obj.tunnel_id})`;
@@ -331,6 +346,9 @@ export function createCanvasRenderer(state, dom) {
       if (state.activeTool === 'platform') {
         ctx.strokeStyle = palette.platform.color;
         ctx.fillStyle = `rgba(${palette.platform.rgb}, 0.15)`;
+      } else if (state.activeTool === 'area') {
+        ctx.strokeStyle = palette.area.color;
+        ctx.fillStyle = `rgba(${palette.area.rgb}, 0.15)`;
       } else {
         ctx.strokeStyle = palette.tunnel.color;
         ctx.fillStyle = `rgba(${palette.tunnel.rgb}, 0.15)`;

@@ -11,6 +11,7 @@ export function getDOM() {
 
     toolSelect: document.getElementById('tool-select'),
     toolPlatform: document.getElementById('tool-platform'),
+    toolArea: document.getElementById('tool-area'),
     toolPolygon: document.getElementById('tool-polygon'),
     toolPolyFloorLine: document.getElementById('tool-poly-floor-line'),
     toolTunnel: document.getElementById('tool-tunnel'),
@@ -30,6 +31,8 @@ export function getDOM() {
     propType: document.getElementById('prop-type'),
     propCollisionContainer: document.getElementById('prop-collision-container'),
     propCollision: document.getElementById('prop-collision'),
+    propNameContainer: document.getElementById('prop-name-container'),
+    propName: document.getElementById('prop-name'),
     propTunnelContainer: document.getElementById('prop-tunnel-container'),
     propTunnelId: document.getElementById('prop-tunnel-id'),
     propCoords: document.getElementById('prop-coords'),

@@ -59,6 +59,10 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
   }
 
   function getObjectLabel(obj, hasPolygon) {
+    if (obj.type === 'area') {
+      return obj.name || 'paper_station';
+    }
+
     if (obj.type !== 'tunnel') return null;
 
     return `Tunnel (ID: ${obj.tunnel_id})`;

@@ -31,6 +31,9 @@
           <button id="tool-platform" class="btn tool-btn" data-tool="platform">
             <span class="icon">🧱</span> Platform
           </button>
+          <button id="tool-area" class="btn tool-btn" data-tool="area">
+            <span class="icon">🏷️</span> Area
+          </button>
           <button id="tool-polygon" class="btn tool-btn" data-tool="polygon">
             <span class="icon">📐</span> Polygon Floor
           </button>
@@ -108,6 +111,10 @@
               <span class="prop-label">Collision:</span>
               <span class="prop-val" id="prop-collision">true</span>
             </div>
+            <div class="prop-row" id="prop-name-container" style="display: none;">
+              <label class="prop-label" for="prop-name">Name:</label>
+              <input type="text" id="prop-name" class="prop-input" value="paper_station">
+            </div>
             <div class="prop-row" id="prop-tunnel-container" style="display: none;">
               <label class="prop-label" for="prop-tunnel-id">Tunnel ID:</label>
               <input type="number" id="prop-tunnel-id" class="prop-input" value="0">
@@ -142,14 +149,14 @@
         <div class="instructions-panel">
           <h3>Keyboard & Mouse Controls</h3>
           <ul>
-            <li><strong>Draw rectangle:</strong> Use Platform or Tunnel, then drag and release.</li>
+            <li><strong>Draw rectangle:</strong> Use Platform, Area, or Tunnel, then drag and release.</li>
             <li><strong>Draw slope floor:</strong> Use Polygon Floor, click points, then click first point to finish.</li>
             <li><strong>Draw one-way floor line:</strong> Use Poly Floor Line, click points, right-click or double-click to finish.</li>
             <li><strong>Place spawn point:</strong> Use Spawn Point, then click once to place a red crosshair marker.</li>
             <li><strong>Select:</strong> Click on an existing shape to view/edit properties.</li>
             <li><strong>Delete:</strong> Press <kbd>Delete</kbd> or <kbd>Backspace</kbd> when a shape is selected.</li>
             <li><strong>Cancel drawing:</strong> Press <kbd>Escape</kbd>.</li>
-            <li><strong>Real-time Sync:</strong> Edit coordinates directly in the JSON box to update shapes. Change spawn names by editing each spawn point's <code>name</code> field in JSON.</li>
+            <li><strong>Real-time Sync:</strong> Edit coordinates directly in the JSON box to update shapes. Area names can be changed in the properties panel or by editing each area's <code>name</code> field in JSON.</li>
           </ul>
         </div>
       </section>

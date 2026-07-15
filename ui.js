@@ -12,6 +12,7 @@ export function createUI(state, dom, draw, callbacks) {
     state.activeTool = toolName;
     dom.toolSelect.classList.toggle('active', toolName === 'select');
     dom.toolPlatform.classList.toggle('active', toolName === 'platform');
+    dom.toolArea.classList.toggle('active', toolName === 'area');
     dom.toolPolygon.classList.toggle('active', toolName === 'polygon');
     dom.toolPolyFloorLine.classList.toggle('active', toolName === 'poly_floor_line');
     dom.toolTunnel.classList.toggle('active', toolName === 'tunnel');
@@ -55,14 +56,22 @@ export function createUI(state, dom, draw, callbacks) {
 
     if (obj.type === 'platform' || obj.type === 'poly_floor_line') {
       dom.propCollisionContainer.style.display = 'flex';
+      dom.propNameContainer.style.display = 'none';
       dom.propTunnelContainer.style.display = 'none';
       dom.propCollision.textContent = String(obj.collision);
+    } else if (obj.type === 'area') {
+      dom.propCollisionContainer.style.display = 'none';
+      dom.propNameContainer.style.display = 'flex';
+      dom.propTunnelContainer.style.display = 'none';
+      dom.propName.value = typeof obj.name === 'string' && obj.name.trim() ? obj.name : 'paper_station';
     } else if (obj.type === 'tunnel') {
       dom.propCollisionContainer.style.display = 'none';
+      dom.propNameContainer.style.display = 'none';
       dom.propTunnelContainer.style.display = 'flex';
       dom.propTunnelId.value = obj.tunnel_id;
     } else {
       dom.propCollisionContainer.style.display = 'none';
+      dom.propNameContainer.style.display = 'none';
       dom.propTunnelContainer.style.display = 'none';
     }
   }
@@ -96,6 +105,21 @@ export function createUI(state, dom, draw, callbacks) {
     }
   }
 
+  function onNameChange(e) {
+    if (state.selectedObjectIndex === -1) return;
+
+    const obj = state.objects[state.selectedObjectIndex];
+    if (obj && obj.type === 'area') {
+      const nextName = e.target.value.trim();
+      obj.name = nextName || 'paper_station';
+      if (e.target.value !== obj.name) {
+        e.target.value = obj.name;
+      }
+      callbacks.updateJSONTextarea();
+      draw();
+    }
+  }
+
   function clearAllObjects() {
     if (state.objects.length === 0) return;
 
@@ -113,6 +137,7 @@ export function createUI(state, dom, draw, callbacks) {
     showProperties,
     hideProperties,
     deleteSelectedObject,
+    onNameChange,
     onTunnelIdChange,
     clearAllObjects
   };
