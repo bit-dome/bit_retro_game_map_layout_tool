@@ -65,7 +65,10 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
 
     if (obj.type !== 'tunnel') return null;
 
-    return `Tunnel (ID: ${obj.tunnel_id})`;
+    const tunnelName = typeof obj.tunnel_name === 'string' && obj.tunnel_name.trim()
+      ? obj.tunnel_name
+      : (obj.tunnel_id !== undefined ? String(obj.tunnel_id) : '');
+    return `Tunnel (${tunnelName})`;
   }
 
   function getLabelBounds(obj) {

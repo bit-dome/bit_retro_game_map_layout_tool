@@ -68,7 +68,7 @@ export function createUI(state, dom, draw, callbacks) {
       dom.propCollisionContainer.style.display = 'none';
       dom.propNameContainer.style.display = 'none';
       dom.propTunnelContainer.style.display = 'flex';
-      dom.propTunnelId.value = obj.tunnel_id;
+      dom.propTunnelId.value = typeof obj.tunnel_name === 'string' ? obj.tunnel_name : '';
     } else {
       dom.propCollisionContainer.style.display = 'none';
       dom.propNameContainer.style.display = 'none';
@@ -93,13 +93,12 @@ export function createUI(state, dom, draw, callbacks) {
     draw();
   }
 
-  function onTunnelIdChange(e) {
+  function onTunnelNameChange(e) {
     if (state.selectedObjectIndex === -1) return;
 
     const obj = state.objects[state.selectedObjectIndex];
     if (obj && obj.type === 'tunnel') {
-      const val = parseInt(e.target.value, 10);
-      obj.tunnel_id = Number.isNaN(val) ? 0 : val;
+      obj.tunnel_name = e.target.value;
       callbacks.updateJSONTextarea();
       draw();
     }
@@ -138,7 +137,7 @@ export function createUI(state, dom, draw, callbacks) {
     hideProperties,
     deleteSelectedObject,
     onNameChange,
-    onTunnelIdChange,
+    onTunnelNameChange,
     clearAllObjects
   };
 }

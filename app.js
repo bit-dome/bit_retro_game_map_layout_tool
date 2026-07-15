@@ -50,7 +50,7 @@ function setupEventListeners() {
   dom.closeProperties.addEventListener('click', uiActions.hideProperties);
   dom.btnDeleteObject.addEventListener('click', uiActions.deleteSelectedObject);
   dom.propName.addEventListener('input', uiActions.onNameChange);
-  dom.propTunnelId.addEventListener('input', uiActions.onTunnelIdChange);
+  dom.propTunnelId.addEventListener('input', uiActions.onTunnelNameChange);
 
   dom.jsonDropZone.addEventListener('dragover', jsonSync.onJSONDragOver);
   dom.jsonDropZone.addEventListener('dragleave', jsonSync.onJSONDragLeave);

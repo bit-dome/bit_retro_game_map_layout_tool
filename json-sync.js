@@ -80,7 +80,13 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
             cleaned.collision = obj.collision !== undefined ? obj.collision : true;
             cleaned.one_way = obj.one_way !== undefined ? Boolean(obj.one_way) : true;
           } else if (cleaned.type === 'tunnel') {
-            cleaned.tunnel_id = obj.tunnel_id !== undefined ? Number(obj.tunnel_id) : 0;
+            if (typeof obj.tunnel_name === 'string') {
+              cleaned.tunnel_name = obj.tunnel_name;
+            } else if (obj.tunnel_id !== undefined) {
+              cleaned.tunnel_name = String(obj.tunnel_id);
+            } else {
+              cleaned.tunnel_name = '';
+            }
           } else if (cleaned.type === 'spawn_point') {
             cleaned.name = typeof obj.name === 'string' && obj.name.trim() ? obj.name.trim() : 'coin';
           }

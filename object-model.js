@@ -24,13 +24,19 @@ export function buildObjectFromDrag(state, canvasWidth, canvasHeight) {
   } else if (state.activeTool === 'area') {
     newObject.name = 'paper_station';
   } else if (state.activeTool === 'tunnel') {
-    let maxId = 0;
+    let maxSuffix = 0;
     state.objects.forEach((obj) => {
-      if (obj.type === 'tunnel' && typeof obj.tunnel_id === 'number') {
-        maxId = Math.max(maxId, obj.tunnel_id);
-      }
+      if (obj.type !== 'tunnel') return;
+
+      const source = typeof obj.tunnel_name === 'string' && obj.tunnel_name.trim()
+        ? obj.tunnel_name
+        : String(obj.tunnel_id ?? '');
+      const match = source.match(/^(?:tunnel_)?(\d+)$/i);
+      if (!match) return;
+
+      maxSuffix = Math.max(maxSuffix, Number(match[1]) || 0);
     });
-    newObject.tunnel_id = maxId + 1;
+    newObject.tunnel_name = `tunnel_${maxSuffix + 1}`;
   }
 
   return newObject;
