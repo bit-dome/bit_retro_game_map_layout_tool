@@ -37,13 +37,13 @@ export function buildObjectFromDrag(state, canvasWidth, canvasHeight) {
   return newObject;
 }
 
-export function buildSpawnPoint(canvasX, canvasY, canvasWidth, canvasHeight) {
+export function buildSpawnPoint(canvasX, canvasY, canvasWidth, canvasHeight, defaultName = 'coin') {
   const x = canvasX / canvasWidth;
   const y = canvasY / canvasHeight;
 
   return {
     type: 'spawn_point',
-    name: 'coin',
+    name: typeof defaultName === 'string' && defaultName.trim() ? defaultName.trim() : 'coin',
     coord: {
       x: parseFloat(x.toFixed(4)),
       y: parseFloat(y.toFixed(4))

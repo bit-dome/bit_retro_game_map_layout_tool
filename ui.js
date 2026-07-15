@@ -64,6 +64,13 @@ export function createUI(state, dom, draw, callbacks) {
       dom.propNameContainer.style.display = 'flex';
       dom.propTunnelContainer.style.display = 'none';
       dom.propName.value = typeof obj.name === 'string' && obj.name.trim() ? obj.name : 'paper_station';
+    } else if (obj.type === 'spawn_point') {
+      dom.propCollisionContainer.style.display = 'none';
+      dom.propNameContainer.style.display = 'flex';
+      dom.propTunnelContainer.style.display = 'none';
+      dom.propName.value = typeof obj.name === 'string' && obj.name.trim()
+        ? obj.name
+        : (typeof state.lastSpawnName === 'string' && state.lastSpawnName.trim() ? state.lastSpawnName : 'coin');
     } else if (obj.type === 'tunnel') {
       dom.propCollisionContainer.style.display = 'none';
       dom.propNameContainer.style.display = 'none';
@@ -108,9 +115,12 @@ export function createUI(state, dom, draw, callbacks) {
     if (state.selectedObjectIndex === -1) return;
 
     const obj = state.objects[state.selectedObjectIndex];
-    if (obj && obj.type === 'area') {
+    if (obj && (obj.type === 'area' || obj.type === 'spawn_point')) {
       const nextName = e.target.value.trim();
-      obj.name = nextName || 'paper_station';
+      obj.name = nextName || (obj.type === 'spawn_point' ? 'coin' : 'paper_station');
+      if (obj.type === 'spawn_point') {
+        state.lastSpawnName = obj.name;
+      }
       if (e.target.value !== obj.name) {
         e.target.value = obj.name;
       }

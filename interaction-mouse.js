@@ -373,7 +373,14 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
 
       const { mapWidth, mapHeight, mapOffsetX, mapOffsetY } = getMapMetrics();
 
-      const newObject = buildSpawnPoint(x - mapOffsetX, y - mapOffsetY, mapWidth, mapHeight);
+      const newObject = buildSpawnPoint(
+        x - mapOffsetX,
+        y - mapOffsetY,
+        mapWidth,
+        mapHeight,
+        state.lastSpawnName
+      );
+      state.lastSpawnName = newObject.name;
       state.objects.push(newObject);
       state.selectedObjectIndex = state.objects.length - 1;
       uiActions.showProperties(state.selectedObjectIndex);

@@ -1,6 +1,7 @@
 export function createInitialState() {
   return {
     objects: [],
+    lastSpawnName: 'coin',
     activeTool: 'select',
     selectedObjectIndex: -1,
     isDrawing: false,

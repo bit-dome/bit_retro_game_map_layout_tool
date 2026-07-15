@@ -1,4 +1,13 @@
 export function createCanvasRenderer(state, dom) {
+  const SPAWN_VISUALS = [
+    { shape: 'cross', color: '#ef4444', rgb: '239, 68, 68' },
+    { shape: 'triangle', color: '#22c55e', rgb: '34, 197, 94' },
+    { shape: 'circle', color: '#3b82f6', rgb: '59, 130, 246' },
+    { shape: 'diamond', color: '#f59e0b', rgb: '245, 158, 11' },
+    { shape: 'square', color: '#a855f7', rgb: '168, 85, 247' },
+    { shape: 'hexagon', color: '#14b8a6', rgb: '20, 184, 166' }
+  ];
+
   function getMapMetrics() {
     const domMapWidth = dom.mapImg.clientWidth;
     const domMapHeight = dom.mapImg.clientHeight;
@@ -53,7 +62,89 @@ export function createCanvasRenderer(state, dom) {
     };
   }
 
-  function getObjectColorVars(obj, palette) {
+  function getSpawnName(obj) {
+    if (!obj || obj.type !== 'spawn_point') return '';
+
+    const rawName = typeof obj.name === 'string' && obj.name.trim() ? obj.name.trim() : 'coin';
+    return rawName.toLowerCase();
+  }
+
+  function getSpawnVisualMap(objects) {
+    const uniqueSpawnNames = [...new Set(
+      objects
+        .filter((obj) => obj && obj.type === 'spawn_point')
+        .map((obj) => getSpawnName(obj))
+        .filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b));
+
+    const visualMap = new Map();
+    uniqueSpawnNames.forEach((name, idx) => {
+      visualMap.set(name, SPAWN_VISUALS[idx % SPAWN_VISUALS.length]);
+    });
+
+    return visualMap;
+  }
+
+  function drawSpawnMarker(centerX, centerY, marker, isSelected) {
+    const { ctx } = dom;
+    const size = isSelected ? 10 : 8;
+
+    ctx.save();
+    ctx.strokeStyle = marker.color;
+    ctx.fillStyle = marker.color;
+    ctx.lineWidth = isSelected ? 3 : 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    if (marker.shape === 'triangle') {
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY - size);
+      ctx.lineTo(centerX + size, centerY + size);
+      ctx.lineTo(centerX - size, centerY + size);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (marker.shape === 'circle') {
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, size, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (marker.shape === 'diamond') {
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY - size);
+      ctx.lineTo(centerX + size, centerY);
+      ctx.lineTo(centerX, centerY + size);
+      ctx.lineTo(centerX - size, centerY);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (marker.shape === 'square') {
+      const edge = size * 1.8;
+      ctx.strokeRect(centerX - edge / 2, centerY - edge / 2, edge, edge);
+    } else if (marker.shape === 'hexagon') {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i += 1) {
+        const angle = ((Math.PI * 2) / 6) * i - Math.PI / 2;
+        const px = centerX + Math.cos(angle) * size;
+        const py = centerY + Math.sin(angle) * size;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(centerX - size, centerY - size);
+      ctx.lineTo(centerX + size, centerY + size);
+      ctx.moveTo(centerX + size, centerY - size);
+      ctx.lineTo(centerX - size, centerY + size);
+      ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function getObjectColorVars(obj, palette, spawnVisualMap) {
     if (obj.type === 'poly_floor_line') {
       return {
         colorVar: palette.polyFloorLine.color,
@@ -76,9 +167,10 @@ export function createCanvasRenderer(state, dom) {
     }
 
     if (obj.type === 'spawn_point') {
+      const marker = spawnVisualMap.get(getSpawnName(obj));
       return {
-        colorVar: palette.spawnPoint.color,
-        colorRgbVar: palette.spawnPoint.rgb
+        colorVar: marker?.color || palette.spawnPoint.color,
+        colorRgbVar: marker?.rgb || palette.spawnPoint.rgb
       };
     }
 
@@ -143,6 +235,7 @@ export function createCanvasRenderer(state, dom) {
   function draw() {
     const { ctx, paintCanvas } = dom;
     const palette = getCanvasPalette();
+    const spawnVisualMap = getSpawnVisualMap(state.objects);
 
     ctx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
 
@@ -194,7 +287,7 @@ export function createCanvasRenderer(state, dom) {
       h = y2 - y1;
 
       const isSelected = idx === state.selectedObjectIndex;
-      const { colorVar, colorRgbVar } = getObjectColorVars(obj, palette);
+      const { colorVar, colorRgbVar } = getObjectColorVars(obj, palette, spawnVisualMap);
 
       ctx.strokeStyle = `rgba(${colorRgbVar}, ${isSelected ? '1' : '0.7'})`;
       ctx.fillStyle = `rgba(${colorRgbVar}, ${isSelected ? '0.0' : '0.12'})`;
@@ -206,19 +299,8 @@ export function createCanvasRenderer(state, dom) {
       } else if (hasPoint) {
         const centerX = toCanvasX(Number(obj.coord.x) || 0);
         const centerY = toCanvasY(Number(obj.coord.y) || 0);
-        const crosshairRadius = isSelected ? 10 : 8;
-
-        ctx.beginPath();
-        ctx.moveTo(centerX - crosshairRadius, centerY);
-        ctx.lineTo(centerX + crosshairRadius, centerY);
-        ctx.moveTo(centerX, centerY - crosshairRadius);
-        ctx.lineTo(centerX, centerY + crosshairRadius);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = colorVar;
-        ctx.fill();
+        const marker = spawnVisualMap.get(getSpawnName(obj)) || SPAWN_VISUALS[0];
+        drawSpawnMarker(centerX, centerY, marker, isSelected);
       } else if (hasPolygon) {
         drawPolygonPath(obj.polygon);
         ctx.fill();
