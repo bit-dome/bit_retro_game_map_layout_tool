@@ -262,7 +262,6 @@ body {
   padding: 1.25rem;
   border-right: 1px solid var(--border-color);
   overflow: hidden;
-  position: relative;
 }
 
 .json-column {
@@ -421,20 +420,18 @@ body {
   cursor: crosshair;
 }
 
-/* Properties Floating Panel */
+/* Properties Panel */
 .properties-panel {
-  position: absolute;
-  bottom: 2rem;
-  left: 2rem;
-  width: 280px;
+  width: 100%;
+  margin-top: 0.25rem;
   background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-color-focus);
   border-radius: 0.75rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  z-index: 5;
   animation: slideInUp var(--transition-normal);
+  flex-shrink: 0;
 }
 
 @keyframes slideInUp {
@@ -635,43 +632,6 @@ body {
 }
 
 .btn-text:hover {
-  color: var(--text-primary);
-}
-
-/* Instructions Panel */
-.instructions-panel {
-  background-color: var(--bg-panel);
-  border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  flex-shrink: 0;
-}
-
-.instructions-panel h3 {
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted);
-  margin-bottom: 0.5rem;
-}
-
-.instructions-panel ul {
-  list-style: none;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.instructions-panel kbd {
-  background-color: var(--bg-control);
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  padding: 0.1rem 0.3rem;
-  font-family: inherit;
-  font-size: 0.75rem;
   color: var(--text-primary);
 }
 

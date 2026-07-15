@@ -96,7 +96,24 @@
           </div>
         </div>
 
-        <!-- Selected Object Properties panel (floats or stays fixed at the bottom of the editor) -->
+      </section>
+
+      <!-- Right Column: JSON Editor -->
+      <section class="json-column">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>map.json</h2>
+            <span id="json-status" class="status-badge valid">Valid</span>
+          </div>
+          <div class="panel-header-right">
+            <button id="btn-format-json" class="btn-text" title="Reformat JSON">✨ Format</button>
+          </div>
+        </div>
+
+        <div class="json-editor-container" id="json-drop-zone">
+          <textarea id="json-textarea" spellcheck="false" autocomplete="off" placeholder="{\n  &quot;objects&quot;: []\n}"></textarea>
+        </div>
+
         <div class="properties-panel" id="properties-panel" style="display: none;">
           <div class="properties-header">
             <h3>Object Properties</h3>
@@ -127,37 +144,6 @@
               <span class="icon">🗑️</span> Delete Object
             </button>
           </div>
-        </div>
-      </section>
-
-      <!-- Right Column: JSON Editor -->
-      <section class="json-column">
-        <div class="panel-header">
-          <div class="panel-header-left">
-            <h2>map.json</h2>
-            <span id="json-status" class="status-badge valid">Valid</span>
-          </div>
-          <div class="panel-header-right">
-            <button id="btn-format-json" class="btn-text" title="Reformat JSON">✨ Format</button>
-          </div>
-        </div>
-
-        <div class="json-editor-container" id="json-drop-zone">
-          <textarea id="json-textarea" spellcheck="false" autocomplete="off" placeholder="{\n  &quot;objects&quot;: []\n}"></textarea>
-        </div>
-
-        <div class="instructions-panel">
-          <h3>Keyboard & Mouse Controls</h3>
-          <ul>
-            <li><strong>Draw rectangle:</strong> Use Platform, Area, or Tunnel, then drag and release.</li>
-            <li><strong>Draw slope floor:</strong> Use Polygon Floor, click points, then click first point to finish.</li>
-            <li><strong>Draw one-way floor line:</strong> Use Poly Floor Line, click points, right-click or double-click to finish.</li>
-            <li><strong>Place spawn point:</strong> Use Spawn Point, then click once to place a red crosshair marker.</li>
-            <li><strong>Select:</strong> Click on an existing shape to view/edit properties.</li>
-            <li><strong>Delete:</strong> Press <kbd>Delete</kbd> or <kbd>Backspace</kbd> when a shape is selected.</li>
-            <li><strong>Cancel drawing:</strong> Press <kbd>Escape</kbd>.</li>
-            <li><strong>Real-time Sync:</strong> Edit coordinates directly in the JSON box to update shapes. Area names can be changed in the properties panel or by editing each area's <code>name</code> field in JSON.</li>
-          </ul>
         </div>
       </section>
     </main>
