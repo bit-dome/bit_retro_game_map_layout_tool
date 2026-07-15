@@ -4,11 +4,6 @@ export function buildObjectFromDrag(state, canvasWidth, canvasHeight) {
   let y1 = Math.min(state.dragStart.y, state.dragEnd.y) / canvasHeight;
   let y2 = Math.max(state.dragStart.y, state.dragEnd.y) / canvasHeight;
 
-  x1 = Math.max(0, Math.min(1, x1));
-  x2 = Math.max(0, Math.min(1, x2));
-  y1 = Math.max(0, Math.min(1, y1));
-  y2 = Math.max(0, Math.min(1, y2));
-
   const newObject = {
     type: state.activeTool,
     rectangle: {
@@ -43,8 +38,8 @@ export function buildObjectFromDrag(state, canvasWidth, canvasHeight) {
 }
 
 export function buildSpawnPoint(canvasX, canvasY, canvasWidth, canvasHeight) {
-  const x = Math.max(0, Math.min(1, canvasX / canvasWidth));
-  const y = Math.max(0, Math.min(1, canvasY / canvasHeight));
+  const x = canvasX / canvasWidth;
+  const y = canvasY / canvasHeight;
 
   return {
     type: 'spawn_point',
@@ -60,8 +55,8 @@ export function buildPlatformPolygon(points, canvasWidth, canvasHeight) {
   if (!Array.isArray(points) || points.length < 3) return null;
 
   const normalizedPoints = points.map((pt) => {
-    const x = Math.max(0, Math.min(1, pt.x / canvasWidth));
-    const y = Math.max(0, Math.min(1, pt.y / canvasHeight));
+    const x = pt.x / canvasWidth;
+    const y = pt.y / canvasHeight;
     return {
       x: parseFloat(x.toFixed(4)),
       y: parseFloat(y.toFixed(4))
@@ -79,8 +74,8 @@ export function buildPolyFloorLine(points, canvasWidth, canvasHeight) {
   if (!Array.isArray(points) || points.length < 2) return null;
 
   const normalizedPoints = points.map((pt) => {
-    const x = Math.max(0, Math.min(1, pt.x / canvasWidth));
-    const y = Math.max(0, Math.min(1, pt.y / canvasHeight));
+    const x = pt.x / canvasWidth;
+    const y = pt.y / canvasHeight;
     return {
       x: parseFloat(x.toFixed(4)),
       y: parseFloat(y.toFixed(4))
@@ -122,8 +117,8 @@ export function normalizeSelectedPolygon(state) {
   if (!obj || !Array.isArray(obj.polygon)) return;
 
   obj.polygon = obj.polygon.map((pt) => ({
-    x: parseFloat((Math.max(0, Math.min(1, Number(pt.x) || 0))).toFixed(4)),
-    y: parseFloat((Math.max(0, Math.min(1, Number(pt.y) || 0))).toFixed(4))
+    x: parseFloat((Number(pt.x) || 0).toFixed(4)),
+    y: parseFloat((Number(pt.y) || 0).toFixed(4))
   }));
 }
 
@@ -134,8 +129,8 @@ export function normalizeSelectedPolyline(state) {
   if (!obj || !Array.isArray(obj.polyline)) return;
 
   obj.polyline = obj.polyline.map((pt) => ({
-    x: parseFloat((Math.max(0, Math.min(1, Number(pt.x) || 0))).toFixed(4)),
-    y: parseFloat((Math.max(0, Math.min(1, Number(pt.y) || 0))).toFixed(4))
+    x: parseFloat((Number(pt.x) || 0).toFixed(4)),
+    y: parseFloat((Number(pt.y) || 0).toFixed(4))
   }));
 }
 
@@ -146,7 +141,7 @@ export function normalizeSelectedPoint(state) {
   if (!obj || !obj.coord) return;
 
   obj.coord = {
-    x: parseFloat((Math.max(0, Math.min(1, Number(obj.coord.x) || 0))).toFixed(4)),
-    y: parseFloat((Math.max(0, Math.min(1, Number(obj.coord.y) || 0))).toFixed(4))
+    x: parseFloat((Number(obj.coord.x) || 0).toFixed(4)),
+    y: parseFloat((Number(obj.coord.y) || 0).toFixed(4))
   };
 }

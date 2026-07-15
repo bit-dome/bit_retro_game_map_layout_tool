@@ -1,4 +1,28 @@
 export function createCanvasRenderer(state, dom) {
+  function getMapMetrics() {
+    const domMapWidth = dom.mapImg.clientWidth;
+    const domMapHeight = dom.mapImg.clientHeight;
+    const domMapOffsetX = dom.mapImg.offsetLeft;
+    const domMapOffsetY = dom.mapImg.offsetTop;
+
+    return {
+      mapWidth: domMapWidth > 0 ? domMapWidth : (state.mapWidth || dom.paintCanvas.width || 1),
+      mapHeight: domMapHeight > 0 ? domMapHeight : (state.mapHeight || dom.paintCanvas.height || 1),
+      mapOffsetX: Number.isFinite(domMapOffsetX) ? domMapOffsetX : (state.mapOffsetX || 0),
+      mapOffsetY: Number.isFinite(domMapOffsetY) ? domMapOffsetY : (state.mapOffsetY || 0)
+    };
+  }
+
+  function toCanvasX(nx) {
+    const { mapWidth, mapOffsetX } = getMapMetrics();
+    return mapOffsetX + nx * mapWidth;
+  }
+
+  function toCanvasY(ny) {
+    const { mapHeight, mapOffsetY } = getMapMetrics();
+    return mapOffsetY + ny * mapHeight;
+  }
+
   function getCanvasPalette() {
     const styles = getComputedStyle(document.documentElement);
     return {
@@ -96,11 +120,11 @@ export function createCanvasRenderer(state, dom) {
   function drawPolygonPath(points) {
     if (!Array.isArray(points) || points.length === 0) return;
 
-    const { ctx, paintCanvas } = dom;
+    const { ctx } = dom;
     ctx.beginPath();
-    ctx.moveTo(points[0].x * paintCanvas.width, points[0].y * paintCanvas.height);
+    ctx.moveTo(toCanvasX(points[0].x), toCanvasY(points[0].y));
     for (let i = 1; i < points.length; i += 1) {
-      ctx.lineTo(points[i].x * paintCanvas.width, points[i].y * paintCanvas.height);
+      ctx.lineTo(toCanvasX(points[i].x), toCanvasY(points[i].y));
     }
     ctx.closePath();
   }
@@ -108,11 +132,11 @@ export function createCanvasRenderer(state, dom) {
   function drawPolylinePath(points) {
     if (!Array.isArray(points) || points.length === 0) return;
 
-    const { ctx, paintCanvas } = dom;
+    const { ctx } = dom;
     ctx.beginPath();
-    ctx.moveTo(points[0].x * paintCanvas.width, points[0].y * paintCanvas.height);
+    ctx.moveTo(toCanvasX(points[0].x), toCanvasY(points[0].y));
     for (let i = 1; i < points.length; i += 1) {
-      ctx.lineTo(points[i].x * paintCanvas.width, points[i].y * paintCanvas.height);
+      ctx.lineTo(toCanvasX(points[i].x), toCanvasY(points[i].y));
     }
   }
 
@@ -138,28 +162,28 @@ export function createCanvasRenderer(state, dom) {
 
       if (hasRectangle) {
         const rect = obj.rectangle;
-        x1 = rect.x1 * paintCanvas.width;
-        y1 = rect.y1 * paintCanvas.height;
-        x2 = rect.x2 * paintCanvas.width;
-        y2 = rect.y2 * paintCanvas.height;
+        x1 = toCanvasX(rect.x1);
+        y1 = toCanvasY(rect.y1);
+        x2 = toCanvasX(rect.x2);
+        y2 = toCanvasY(rect.y2);
       } else if (hasPoint) {
-        const px = (Number(obj.coord.x) || 0) * paintCanvas.width;
-        const py = (Number(obj.coord.y) || 0) * paintCanvas.height;
+        const px = toCanvasX(Number(obj.coord.x) || 0);
+        const py = toCanvasY(Number(obj.coord.y) || 0);
         const halfSize = 10;
         x1 = px - halfSize;
         y1 = py - halfSize;
         x2 = px + halfSize;
         y2 = py + halfSize;
       } else if (hasPolygon) {
-        const px = obj.polygon.map((pt) => pt.x * paintCanvas.width);
-        const py = obj.polygon.map((pt) => pt.y * paintCanvas.height);
+        const px = obj.polygon.map((pt) => toCanvasX(pt.x));
+        const py = obj.polygon.map((pt) => toCanvasY(pt.y));
         x1 = Math.min(...px);
         y1 = Math.min(...py);
         x2 = Math.max(...px);
         y2 = Math.max(...py);
       } else {
-        const px = obj.polyline.map((pt) => pt.x * paintCanvas.width);
-        const py = obj.polyline.map((pt) => pt.y * paintCanvas.height);
+        const px = obj.polyline.map((pt) => toCanvasX(pt.x));
+        const py = obj.polyline.map((pt) => toCanvasY(pt.y));
         x1 = Math.min(...px);
         y1 = Math.min(...py);
         x2 = Math.max(...px);
@@ -180,8 +204,8 @@ export function createCanvasRenderer(state, dom) {
         ctx.fillRect(x1, y1, w, h);
         ctx.strokeRect(x1, y1, w, h);
       } else if (hasPoint) {
-        const centerX = (Number(obj.coord.x) || 0) * paintCanvas.width;
-        const centerY = (Number(obj.coord.y) || 0) * paintCanvas.height;
+        const centerX = toCanvasX(Number(obj.coord.x) || 0);
+        const centerY = toCanvasY(Number(obj.coord.y) || 0);
         const crosshairRadius = isSelected ? 10 : 8;
 
         ctx.beginPath();
@@ -239,8 +263,8 @@ export function createCanvasRenderer(state, dom) {
           ctx.lineWidth = 2;
 
           obj.polygon.forEach((pt, pointIdx) => {
-            const px = pt.x * paintCanvas.width;
-            const py = pt.y * paintCanvas.height;
+            const px = toCanvasX(pt.x);
+            const py = toCanvasY(pt.y);
             const radius = pointIdx === state.selectedVertexIndex ? 6 : 5;
             ctx.beginPath();
             ctx.arc(px, py, radius, 0, Math.PI * 2);
@@ -253,8 +277,8 @@ export function createCanvasRenderer(state, dom) {
           ctx.lineWidth = 2;
 
           obj.polyline.forEach((pt, pointIdx) => {
-            const px = pt.x * paintCanvas.width;
-            const py = pt.y * paintCanvas.height;
+            const px = toCanvasX(pt.x);
+            const py = toCanvasY(pt.y);
             const radius = pointIdx === state.selectedVertexIndex ? 6 : 5;
             ctx.beginPath();
             ctx.arc(px, py, radius, 0, Math.PI * 2);
@@ -262,8 +286,8 @@ export function createCanvasRenderer(state, dom) {
             ctx.stroke();
           });
         } else if (state.activeTool === 'select' && hasPoint) {
-          const centerX = (Number(obj.coord.x) || 0) * paintCanvas.width;
-          const centerY = (Number(obj.coord.y) || 0) * paintCanvas.height;
+          const centerX = toCanvasX(Number(obj.coord.x) || 0);
+          const centerY = toCanvasY(Number(obj.coord.y) || 0);
           ctx.fillStyle = '#ffffff';
           ctx.strokeStyle = colorVar;
           ctx.lineWidth = 2;

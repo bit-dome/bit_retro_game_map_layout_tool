@@ -10,20 +10,62 @@ import {
 } from './object-model.js';
 
 export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTextarea) {
+  function getMapMetrics() {
+    const domMapWidth = dom.mapImg.clientWidth;
+    const domMapHeight = dom.mapImg.clientHeight;
+    const domMapOffsetX = dom.mapImg.offsetLeft;
+    const domMapOffsetY = dom.mapImg.offsetTop;
+
+    return {
+      mapWidth: domMapWidth > 0 ? domMapWidth : (state.mapWidth || dom.paintCanvas.width || 1),
+      mapHeight: domMapHeight > 0 ? domMapHeight : (state.mapHeight || dom.paintCanvas.height || 1),
+      mapOffsetX: Number.isFinite(domMapOffsetX) ? domMapOffsetX : (state.mapOffsetX || 0),
+      mapOffsetY: Number.isFinite(domMapOffsetY) ? domMapOffsetY : (state.mapOffsetY || 0)
+    };
+  }
+
+  function toCanvasX(nx) {
+    const { mapWidth, mapOffsetX } = getMapMetrics();
+    return mapOffsetX + nx * mapWidth;
+  }
+
+  function toCanvasY(ny) {
+    const { mapHeight, mapOffsetY } = getMapMetrics();
+    return mapOffsetY + ny * mapHeight;
+  }
+
+  function toMapX(canvasX) {
+    const { mapWidth, mapOffsetX } = getMapMetrics();
+    return (canvasX - mapOffsetX) / mapWidth;
+  }
+
+  function toMapY(canvasY) {
+    const { mapHeight, mapOffsetY } = getMapMetrics();
+    return (canvasY - mapOffsetY) / mapHeight;
+  }
+
+  function getCanvasPoint(e) {
+    const rect = dom.paintCanvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) * (dom.paintCanvas.width / rect.width),
+      y: (e.clientY - rect.top) * (dom.paintCanvas.height / rect.height)
+    };
+  }
+
   function getObjectBounds(obj) {
     if (obj.rectangle) {
       const rect = obj.rectangle;
       return {
-        x1: Math.min(rect.x1, rect.x2) * dom.paintCanvas.width,
-        y1: Math.min(rect.y1, rect.y2) * dom.paintCanvas.height,
-        x2: Math.max(rect.x1, rect.x2) * dom.paintCanvas.width,
-        y2: Math.max(rect.y1, rect.y2) * dom.paintCanvas.height
+        x1: toCanvasX(Math.min(rect.x1, rect.x2)),
+        y1: toCanvasY(Math.min(rect.y1, rect.y2)),
+        x2: toCanvasX(Math.max(rect.x1, rect.x2)),
+        y2: toCanvasY(Math.max(rect.y1, rect.y2))
       };
     }
 
     if (Array.isArray(obj.polygon) && obj.polygon.length >= 3) {
-      const px = obj.polygon.map((pt) => (Number(pt.x) || 0) * dom.paintCanvas.width);
-      const py = obj.polygon.map((pt) => (Number(pt.y) || 0) * dom.paintCanvas.height);
+      const px = obj.polygon.map((pt) => toCanvasX(Number(pt.x) || 0));
+      const py = obj.polygon.map((pt) => toCanvasY(Number(pt.y) || 0));
       return {
         x1: Math.min(...px),
         y1: Math.min(...py),
@@ -33,8 +75,8 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
     }
 
     if (Array.isArray(obj.polyline) && obj.polyline.length >= 2) {
-      const px = obj.polyline.map((pt) => (Number(pt.x) || 0) * dom.paintCanvas.width);
-      const py = obj.polyline.map((pt) => (Number(pt.y) || 0) * dom.paintCanvas.height);
+      const px = obj.polyline.map((pt) => toCanvasX(Number(pt.x) || 0));
+      const py = obj.polyline.map((pt) => toCanvasY(Number(pt.y) || 0));
       return {
         x1: Math.min(...px),
         y1: Math.min(...py),
@@ -44,8 +86,8 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
     }
 
     if (obj.type === 'spawn_point' && obj.coord) {
-      const x = (Number(obj.coord.x) || 0) * dom.paintCanvas.width;
-      const y = (Number(obj.coord.y) || 0) * dom.paintCanvas.height;
+      const x = toCanvasX(Number(obj.coord.x) || 0);
+      const y = toCanvasY(Number(obj.coord.y) || 0);
       const halfSize = 10;
       return {
         x1: x - halfSize,
@@ -156,9 +198,15 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
       return;
     }
 
+    const { mapWidth, mapHeight, mapOffsetX, mapOffsetY } = getMapMetrics();
+    const mapRelativePoints = state.polygonPoints.map((pt) => ({
+      x: pt.x - mapOffsetX,
+      y: pt.y - mapOffsetY
+    }));
+
     const newObject = state.activeTool === 'poly_floor_line'
-      ? buildPolyFloorLine(state.polygonPoints, dom.paintCanvas.width, dom.paintCanvas.height)
-      : buildPlatformPolygon(state.polygonPoints, dom.paintCanvas.width, dom.paintCanvas.height);
+      ? buildPolyFloorLine(mapRelativePoints, mapWidth, mapHeight)
+      : buildPlatformPolygon(mapRelativePoints, mapWidth, mapHeight);
     clearPolygonDraft();
 
     if (!newObject) {
@@ -174,8 +222,8 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
   }
 
   function getObjectIndexAt(canvasX, canvasY) {
-    const nx = canvasX / dom.paintCanvas.width;
-    const ny = canvasY / dom.paintCanvas.height;
+    const nx = toMapX(canvasX);
+    const ny = toMapY(canvasY);
 
     for (let i = state.objects.length - 1; i >= 0; i -= 1) {
       const obj = state.objects[i];
@@ -196,25 +244,25 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
       } else if (Array.isArray(obj.polygon) && obj.polygon.length >= 3 && isPointInPolygon(nx, ny, obj.polygon)) {
         return i;
       } else if (Array.isArray(obj.polyline) && obj.polyline.length >= 2) {
-        const px = nx * dom.paintCanvas.width;
-        const py = ny * dom.paintCanvas.height;
+        const px = canvasX;
+        const py = canvasY;
         const hitTolerance = 8;
 
         for (let seg = 0; seg < obj.polyline.length - 1; seg += 1) {
           const p1 = obj.polyline[seg];
           const p2 = obj.polyline[seg + 1];
-          const x1 = (Number(p1.x) || 0) * dom.paintCanvas.width;
-          const y1 = (Number(p1.y) || 0) * dom.paintCanvas.height;
-          const x2 = (Number(p2.x) || 0) * dom.paintCanvas.width;
-          const y2 = (Number(p2.y) || 0) * dom.paintCanvas.height;
+          const x1 = toCanvasX(Number(p1.x) || 0);
+          const y1 = toCanvasY(Number(p1.y) || 0);
+          const x2 = toCanvasX(Number(p2.x) || 0);
+          const y2 = toCanvasY(Number(p2.y) || 0);
 
           if (pointToSegmentDistance(px, py, x1, y1, x2, y2) <= hitTolerance) {
             return i;
           }
         }
       } else if (obj.type === 'spawn_point' && obj.coord) {
-        const pointX = (Number(obj.coord.x) || 0) * dom.paintCanvas.width;
-        const pointY = (Number(obj.coord.y) || 0) * dom.paintCanvas.height;
+        const pointX = toCanvasX(Number(obj.coord.x) || 0);
+        const pointY = toCanvasY(Number(obj.coord.y) || 0);
         if (Math.hypot(canvasX - pointX, canvasY - pointY) <= 10) {
           return i;
         }
@@ -232,10 +280,10 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
 
     const rect = obj.rectangle;
 
-    const cx1 = rect.x1 * dom.paintCanvas.width;
-    const cy1 = rect.y1 * dom.paintCanvas.height;
-    const cx2 = rect.x2 * dom.paintCanvas.width;
-    const cy2 = rect.y2 * dom.paintCanvas.height;
+    const cx1 = toCanvasX(rect.x1);
+    const cy1 = toCanvasY(rect.y1);
+    const cx2 = toCanvasX(rect.x2);
+    const cy2 = toCanvasY(rect.y2);
 
     const handles = {
       tl: { x: cx1, y: cy1 },
@@ -260,8 +308,8 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
 
     const hitSize = 9;
     for (let i = 0; i < obj.polygon.length; i += 1) {
-      const px = (Number(obj.polygon[i].x) || 0) * dom.paintCanvas.width;
-      const py = (Number(obj.polygon[i].y) || 0) * dom.paintCanvas.height;
+      const px = toCanvasX(Number(obj.polygon[i].x) || 0);
+      const py = toCanvasY(Number(obj.polygon[i].y) || 0);
       if (Math.abs(x - px) <= hitSize && Math.abs(y - py) <= hitSize) {
         return i;
       }
@@ -275,8 +323,8 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
 
     const hitSize = 9;
     for (let i = 0; i < obj.polyline.length; i += 1) {
-      const px = (Number(obj.polyline[i].x) || 0) * dom.paintCanvas.width;
-      const py = (Number(obj.polyline[i].y) || 0) * dom.paintCanvas.height;
+      const px = toCanvasX(Number(obj.polyline[i].x) || 0);
+      const py = toCanvasY(Number(obj.polyline[i].y) || 0);
       if (Math.abs(x - px) <= hitSize && Math.abs(y - py) <= hitSize) {
         return i;
       }
@@ -288,9 +336,7 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
   function onMouseDown(e) {
     if (!state.imageLoaded) return;
 
-    const rect = dom.paintCanvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = getCanvasPoint(e);
 
     if (isPointDrawingTool(state.activeTool)) {
       if (e.button === 2) return;
@@ -325,7 +371,9 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
     if (state.activeTool === 'spawn_point') {
       if (e.button !== 0) return;
 
-      const newObject = buildSpawnPoint(x, y, dom.paintCanvas.width, dom.paintCanvas.height);
+      const { mapWidth, mapHeight, mapOffsetX, mapOffsetY } = getMapMetrics();
+
+      const newObject = buildSpawnPoint(x - mapOffsetX, y - mapOffsetY, mapWidth, mapHeight);
       state.objects.push(newObject);
       state.selectedObjectIndex = state.objects.length - 1;
       uiActions.showProperties(state.selectedObjectIndex);
@@ -381,9 +429,7 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
   function onMouseMove(e) {
     if (!state.imageLoaded) return;
 
-    const rect = dom.paintCanvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = getCanvasPoint(e);
 
     if (state.activeTool === 'select') {
       if (state.isDraggingVertex && state.selectedObjectIndex !== -1) {
@@ -399,16 +445,17 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
         if (!targetPoints || vertexIndex < 0 || vertexIndex >= targetPoints.length) return;
 
         targetPoints[vertexIndex] = {
-          x: parseFloat((Math.max(0, Math.min(1, x / dom.paintCanvas.width))).toFixed(4)),
-          y: parseFloat((Math.max(0, Math.min(1, y / dom.paintCanvas.height))).toFixed(4))
+          x: parseFloat(toMapX(x).toFixed(4)),
+          y: parseFloat(toMapY(y).toFixed(4))
         };
 
         uiActions.showProperties(state.selectedObjectIndex);
         updateJSONTextarea();
         draw();
       } else if (state.isResizing && state.selectedObjectIndex !== -1) {
-        const deltaX = (x - state.resizeStartPos.x) / dom.paintCanvas.width;
-        const deltaY = (y - state.resizeStartPos.y) / dom.paintCanvas.height;
+        const { mapWidth, mapHeight } = getMapMetrics();
+        const deltaX = (x - state.resizeStartPos.x) / mapWidth;
+        const deltaY = (y - state.resizeStartPos.y) / mapHeight;
         const initial = state.initialRectCoords;
         const selectedObj = state.objects[state.selectedObjectIndex];
 
@@ -423,20 +470,20 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
 
         switch (state.resizeHandle) {
           case 'tl':
-            x1 = Math.max(0, Math.min(initial.x1 + deltaX, x2 - minSize));
-            y1 = Math.max(0, Math.min(initial.y1 + deltaY, y2 - minSize));
+            x1 = Math.min(initial.x1 + deltaX, x2 - minSize);
+            y1 = Math.min(initial.y1 + deltaY, y2 - minSize);
             break;
           case 'tr':
-            x2 = Math.max(x1 + minSize, Math.min(initial.x2 + deltaX, 1));
-            y1 = Math.max(0, Math.min(initial.y1 + deltaY, y2 - minSize));
+            x2 = Math.max(x1 + minSize, initial.x2 + deltaX);
+            y1 = Math.min(initial.y1 + deltaY, y2 - minSize);
             break;
           case 'bl':
-            x1 = Math.max(0, Math.min(initial.x1 + deltaX, x2 - minSize));
-            y2 = Math.max(y1 + minSize, Math.min(initial.y2 + deltaY, 1));
+            x1 = Math.min(initial.x1 + deltaX, x2 - minSize);
+            y2 = Math.max(y1 + minSize, initial.y2 + deltaY);
             break;
           case 'br':
-            x2 = Math.max(x1 + minSize, Math.min(initial.x2 + deltaX, 1));
-            y2 = Math.max(y1 + minSize, Math.min(initial.y2 + deltaY, 1));
+            x2 = Math.max(x1 + minSize, initial.x2 + deltaX);
+            y2 = Math.max(y1 + minSize, initial.y2 + deltaY);
             break;
           default:
             break;
@@ -453,37 +500,19 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
         updateJSONTextarea();
         draw();
       } else if (state.isMoving && state.selectedObjectIndex !== -1) {
-        const deltaX = (x - state.moveStartPos.x) / dom.paintCanvas.width;
-        const deltaY = (y - state.moveStartPos.y) / dom.paintCanvas.height;
+        const { mapWidth, mapHeight } = getMapMetrics();
+        const deltaX = (x - state.moveStartPos.x) / mapWidth;
+        const deltaY = (y - state.moveStartPos.y) / mapHeight;
         const selectedObj = state.objects[state.selectedObjectIndex];
         const initialObj = state.initialRectCoords;
 
         if (!selectedObj || !initialObj) return;
 
         if (selectedObj.rectangle && initialObj.rectangle) {
-          let newX1 = initialObj.rectangle.x1 + deltaX;
-          let newX2 = initialObj.rectangle.x2 + deltaX;
-          const w = newX2 - newX1;
-
-          if (newX1 < 0) {
-            newX1 = 0;
-            newX2 = w;
-          } else if (newX2 > 1) {
-            newX2 = 1;
-            newX1 = 1 - w;
-          }
-
-          let newY1 = initialObj.rectangle.y1 + deltaY;
-          let newY2 = initialObj.rectangle.y2 + deltaY;
-          const h = newY2 - newY1;
-
-          if (newY1 < 0) {
-            newY1 = 0;
-            newY2 = h;
-          } else if (newY2 > 1) {
-            newY2 = 1;
-            newY1 = 1 - h;
-          }
+          const newX1 = initialObj.rectangle.x1 + deltaX;
+          const newX2 = initialObj.rectangle.x2 + deltaX;
+          const newY1 = initialObj.rectangle.y1 + deltaY;
+          const newY2 = initialObj.rectangle.y2 + deltaY;
 
           selectedObj.rectangle = {
             x1: parseFloat(newX1.toFixed(4)),
@@ -492,39 +521,19 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
             y2: parseFloat(newY2.toFixed(4))
           };
         } else if (Array.isArray(selectedObj.polygon) && Array.isArray(initialObj.polygon)) {
-          const xs = initialObj.polygon.map((pt) => Number(pt.x) || 0);
-          const ys = initialObj.polygon.map((pt) => Number(pt.y) || 0);
-          const minX = Math.min(...xs);
-          const maxX = Math.max(...xs);
-          const minY = Math.min(...ys);
-          const maxY = Math.max(...ys);
-
-          const clampedDx = Math.max(-minX, Math.min(deltaX, 1 - maxX));
-          const clampedDy = Math.max(-minY, Math.min(deltaY, 1 - maxY));
-
           selectedObj.polygon = initialObj.polygon.map((pt) => ({
-            x: parseFloat((Number(pt.x) + clampedDx).toFixed(4)),
-            y: parseFloat((Number(pt.y) + clampedDy).toFixed(4))
+            x: parseFloat((Number(pt.x) + deltaX).toFixed(4)),
+            y: parseFloat((Number(pt.y) + deltaY).toFixed(4))
           }));
         } else if (Array.isArray(selectedObj.polyline) && Array.isArray(initialObj.polyline)) {
-          const xs = initialObj.polyline.map((pt) => Number(pt.x) || 0);
-          const ys = initialObj.polyline.map((pt) => Number(pt.y) || 0);
-          const minX = Math.min(...xs);
-          const maxX = Math.max(...xs);
-          const minY = Math.min(...ys);
-          const maxY = Math.max(...ys);
-
-          const clampedDx = Math.max(-minX, Math.min(deltaX, 1 - maxX));
-          const clampedDy = Math.max(-minY, Math.min(deltaY, 1 - maxY));
-
           selectedObj.polyline = initialObj.polyline.map((pt) => ({
-            x: parseFloat((Number(pt.x) + clampedDx).toFixed(4)),
-            y: parseFloat((Number(pt.y) + clampedDy).toFixed(4))
+            x: parseFloat((Number(pt.x) + deltaX).toFixed(4)),
+            y: parseFloat((Number(pt.y) + deltaY).toFixed(4))
           }));
         } else if (selectedObj.coord && initialObj.coord) {
           selectedObj.coord = {
-            x: parseFloat((Math.max(0, Math.min(1, (Number(initialObj.coord.x) || 0) + deltaX))).toFixed(4)),
-            y: parseFloat((Math.max(0, Math.min(1, (Number(initialObj.coord.y) || 0) + deltaY))).toFixed(4))
+            x: parseFloat(((Number(initialObj.coord.x) || 0) + deltaX).toFixed(4)),
+            y: parseFloat(((Number(initialObj.coord.y) || 0) + deltaY).toFixed(4))
           };
         }
 
@@ -597,7 +606,19 @@ export function createMouseInteraction(state, dom, draw, uiActions, updateJSONTe
       const dy = Math.abs(state.dragEnd.y - state.dragStart.y);
 
       if (dx >= 5 && dy >= 5) {
-        const newObject = buildObjectFromDrag(state, dom.paintCanvas.width, dom.paintCanvas.height);
+        const { mapWidth, mapHeight, mapOffsetX, mapOffsetY } = getMapMetrics();
+        const draftState = {
+          ...state,
+          dragStart: {
+            x: state.dragStart.x - mapOffsetX,
+            y: state.dragStart.y - mapOffsetY
+          },
+          dragEnd: {
+            x: state.dragEnd.x - mapOffsetX,
+            y: state.dragEnd.y - mapOffsetY
+          }
+        };
+        const newObject = buildObjectFromDrag(draftState, mapWidth, mapHeight);
         state.objects.push(newObject);
         state.selectedObjectIndex = state.objects.length - 1;
         uiActions.showProperties(state.selectedObjectIndex);

@@ -17,6 +17,12 @@ export function createInitialState() {
     resizeStartPos: { x: 0, y: 0 },
     initialRectCoords: null,
     imageLoaded: false,
-    imageSrc: ''
+    imageSrc: '',
+    mapWidth: 0,
+    mapHeight: 0,
+    mapOffsetX: 0,
+    mapOffsetY: 0,
+    workspacePaddingRatio: 0.35,
+    workspaceMinPadding: 140
   };
 }
