@@ -13,7 +13,7 @@ export function createUI(state, dom, draw, callbacks) {
 
   function updateDecorEventNameVisibility(obj) {
     if (!dom.propDecorEventNameContainer) return;
-    const isInteract = obj?.types === 'interact';
+    const isInteract = obj?.decor_type === 'interact';
     dom.propDecorEventNameContainer.style.display = isInteract ? 'flex' : 'none';
   }
 
@@ -24,8 +24,10 @@ export function createUI(state, dom, draw, callbacks) {
     obj.n_col = clampPositiveInt(obj.n_col, 1);
     obj.fps = clampPositiveInt(obj.fps, 8);
     obj.n_frames = Math.min(clampPositiveInt(obj.n_frames, getDecorCellCount(obj)), getDecorCellCount(obj));
+    const decorType = typeof obj.decor_type === 'string' ? obj.decor_type.trim() : '';
+    obj.decor_type = ['normal', 'background', 'interact'].includes(decorType) ? decorType : 'normal';
     obj.event_name = typeof obj.event_name === 'string' ? obj.event_name.trim() : '';
-    if (obj.types !== 'interact') {
+    if (obj.decor_type !== 'interact') {
       obj.event_name = '';
     }
   }
@@ -124,7 +126,7 @@ export function createUI(state, dom, draw, callbacks) {
       dom.propNameContainer.style.display = 'none';
       dom.propTunnelContainer.style.display = 'none';
       dom.propDecorContainer.style.display = 'block';
-      dom.propDecorTypes.value = ['normal', 'background', 'interact'].includes(obj.types) ? obj.types : 'normal';
+      dom.propDecorTypes.value = obj.decor_type;
       dom.propDecorNRow.value = String(obj.n_row);
       dom.propDecorNCol.value = String(obj.n_col);
       dom.propDecorFps.value = String(obj.fps);
@@ -192,12 +194,12 @@ export function createUI(state, dom, draw, callbacks) {
     if (!obj) return;
 
     const next = e.target.value;
-    obj.types = ['normal', 'background', 'interact'].includes(next) ? next : 'normal';
-    if (obj.types !== 'interact') {
+    obj.decor_type = ['normal', 'background', 'interact'].includes(next) ? next : 'normal';
+    if (obj.decor_type !== 'interact') {
       obj.event_name = '';
       dom.propDecorEventName.value = '';
     }
-    e.target.value = obj.types;
+    e.target.value = obj.decor_type;
     updateDecorEventNameVisibility(obj);
     callbacks.updateJSONTextarea();
     draw();
@@ -264,7 +266,7 @@ export function createUI(state, dom, draw, callbacks) {
     const obj = getSelectedDecorObject();
     if (!obj) return;
 
-    if (obj.types !== 'interact') {
+    if (obj.decor_type !== 'interact') {
       obj.event_name = '';
       e.target.value = '';
       callbacks.updateJSONTextarea();

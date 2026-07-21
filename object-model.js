@@ -19,7 +19,7 @@ export function buildObjectFromDrag(state, canvasWidth, canvasHeight) {
   } else if (state.activeTool === 'area') {
     newObject.name = 'paper_station';
   } else if (state.activeTool === 'decor') {
-    newObject.types = 'normal';
+    newObject.decor_type = 'normal';
     newObject.n_row = 1;
     newObject.n_col = 1;
     newObject.fps = 8;

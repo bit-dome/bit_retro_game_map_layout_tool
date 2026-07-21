@@ -112,7 +112,7 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
           } else if (cleaned.type === 'spawn_point') {
             cleaned.name = typeof obj.name === 'string' && obj.name.trim() ? obj.name.trim() : 'coin';
           } else if (cleaned.type === 'decor') {
-            cleaned.types = sanitizeDecorType(obj.types);
+            cleaned.decor_type = sanitizeDecorType(obj.decor_type ?? obj.types);
             cleaned.n_row = sanitizePositiveInt(obj.n_row, 1);
             cleaned.n_col = sanitizePositiveInt(obj.n_col, 1);
             cleaned.fps = sanitizePositiveInt(obj.fps, 8);
@@ -120,7 +120,7 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
               sanitizePositiveInt(obj.n_frames, cleaned.n_row * cleaned.n_col),
               cleaned.n_row * cleaned.n_col
             );
-            cleaned.event_name = cleaned.types === 'interact'
+            cleaned.event_name = cleaned.decor_type === 'interact'
               ? (typeof obj.event_name === 'string' ? obj.event_name.trim() : '')
               : '';
             cleaned.filename = typeof obj.filename === 'string' ? obj.filename.trim() : '';
