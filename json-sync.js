@@ -1,4 +1,15 @@
 export function createJSONSync(state, dom, draw, showProperties, hideProperties) {
+  function sanitizeDecorType(value) {
+    const type = typeof value === 'string' ? value.trim() : '';
+    return ['normal', 'background', 'interact'].includes(type) ? type : 'normal';
+  }
+
+  function sanitizePositiveInt(value, fallback) {
+    const num = Number(value);
+    if (!Number.isFinite(num) || num <= 0) return fallback;
+    return Math.max(1, Math.round(num));
+  }
+
   function setJSONStatus(isValid, msg = '') {
     if (isValid) {
       dom.jsonStatus.textContent = 'Valid';
@@ -37,7 +48,18 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
             type: obj.type || 'platform'
           };
 
-          if (cleaned.type === 'spawn_point' && obj.coord) {
+          if (cleaned.type === 'decor') {
+            if (obj.rectangle) {
+              cleaned.rectangle = {
+                x1: Number(obj.rectangle.x1) || 0,
+                y1: Number(obj.rectangle.y1) || 0,
+                x2: Number(obj.rectangle.x2) || 0,
+                y2: Number(obj.rectangle.y2) || 0
+              };
+            } else {
+              cleaned.rectangle = { x1: 0, y1: 0, x2: 0.1, y2: 0.1 };
+            }
+          } else if (cleaned.type === 'spawn_point' && obj.coord) {
             cleaned.coord = {
               x: Number(obj.coord.x) || 0,
               y: Number(obj.coord.y) || 0
@@ -89,6 +111,19 @@ export function createJSONSync(state, dom, draw, showProperties, hideProperties)
             }
           } else if (cleaned.type === 'spawn_point') {
             cleaned.name = typeof obj.name === 'string' && obj.name.trim() ? obj.name.trim() : 'coin';
+          } else if (cleaned.type === 'decor') {
+            cleaned.types = sanitizeDecorType(obj.types);
+            cleaned.n_row = sanitizePositiveInt(obj.n_row, 1);
+            cleaned.n_col = sanitizePositiveInt(obj.n_col, 1);
+            cleaned.fps = sanitizePositiveInt(obj.fps, 8);
+            cleaned.n_frames = Math.min(
+              sanitizePositiveInt(obj.n_frames, cleaned.n_row * cleaned.n_col),
+              cleaned.n_row * cleaned.n_col
+            );
+            cleaned.event_name = cleaned.types === 'interact'
+              ? (typeof obj.event_name === 'string' ? obj.event_name.trim() : '')
+              : '';
+            cleaned.filename = typeof obj.filename === 'string' ? obj.filename.trim() : '';
           }
 
           return cleaned;

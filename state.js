@@ -24,6 +24,7 @@ export function createInitialState() {
     mapOffsetX: 0,
     mapOffsetY: 0,
     workspacePaddingRatio: 0.35,
-    workspaceMinPadding: 140
+    workspaceMinPadding: 140,
+    decorSpriteCache: {}
   };
 }

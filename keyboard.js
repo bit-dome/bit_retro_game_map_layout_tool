@@ -19,7 +19,18 @@ export function createKeyboard(state, dom, uiActions, draw, finalizePolygonDrawi
 
     if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedObjectIndex !== -1) {
       const activeElem = document.activeElement;
-      if (activeElem !== dom.jsonTextarea && activeElem !== dom.propTunnelId && activeElem !== dom.propName) {
+      if (
+        activeElem !== dom.jsonTextarea
+        && activeElem !== dom.propTunnelId
+        && activeElem !== dom.propName
+        && activeElem !== dom.propDecorTypes
+        && activeElem !== dom.propDecorNRow
+        && activeElem !== dom.propDecorNCol
+        && activeElem !== dom.propDecorFps
+        && activeElem !== dom.propDecorNFrames
+        && activeElem !== dom.propDecorFilename
+        && activeElem !== dom.propDecorEventName
+      ) {
         uiActions.deleteSelectedObject();
       }
     }

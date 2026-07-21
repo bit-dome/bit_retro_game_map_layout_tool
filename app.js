@@ -30,6 +30,7 @@ function setupEventListeners() {
   dom.toolPolygon.addEventListener('click', () => uiActions.setTool('polygon'));
   dom.toolPolyFloorLine.addEventListener('click', () => uiActions.setTool('poly_floor_line'));
   dom.toolTunnel.addEventListener('click', () => uiActions.setTool('tunnel'));
+  dom.toolDecor.addEventListener('click', () => uiActions.setTool('decor'));
   dom.toolSpawnPoint.addEventListener('click', () => uiActions.setTool('spawn_point'));
 
   dom.btnClear.addEventListener('click', uiActions.clearAllObjects);
@@ -51,6 +52,16 @@ function setupEventListeners() {
   dom.btnDeleteObject.addEventListener('click', uiActions.deleteSelectedObject);
   dom.propName.addEventListener('input', uiActions.onNameChange);
   dom.propTunnelId.addEventListener('input', uiActions.onTunnelNameChange);
+  dom.propDecorTypes.addEventListener('change', uiActions.onDecorTypesChange);
+  dom.propDecorNRow.addEventListener('input', uiActions.onDecorNRowChange);
+  dom.propDecorNCol.addEventListener('input', uiActions.onDecorNColChange);
+  dom.propDecorFps.addEventListener('input', uiActions.onDecorFpsChange);
+  dom.propDecorNFrames.addEventListener('input', uiActions.onDecorNFramesChange);
+  dom.propDecorFilename.addEventListener('input', uiActions.onDecorFilenameChange);
+  dom.propDecorEventName.addEventListener('input', uiActions.onDecorEventNameChange);
+  dom.propDecorDropzone.addEventListener('dragover', uiActions.onDecorDropOver);
+  dom.propDecorDropzone.addEventListener('dragleave', uiActions.onDecorDropLeave);
+  dom.propDecorDropzone.addEventListener('drop', uiActions.onDecorDrop);
 
   dom.jsonDropZone.addEventListener('dragover', jsonSync.onJSONDragOver);
   dom.jsonDropZone.addEventListener('dragleave', jsonSync.onJSONDragLeave);

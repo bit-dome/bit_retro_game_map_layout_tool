@@ -28,6 +28,8 @@
   --color-spawn-point-rgb: 239, 68, 68;
   --color-tunnel: #9d4edd;
   --color-tunnel-rgb: 157, 78, 221;
+  --color-decor: #facc15;
+  --color-decor-rgb: 250, 204, 21;
   
   /* Status Colors */
   --color-success: #10b981;
@@ -230,6 +232,14 @@ body {
   border-color: var(--color-spawn-point);
   color: #fca5a5;
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+  font-weight: 600;
+}
+
+.tool-btn.active[data-tool="decor"] {
+  background-color: rgba(250, 204, 21, 0.15);
+  border-color: var(--color-decor);
+  color: #fde047;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
   font-weight: 600;
 }
 
@@ -532,6 +542,12 @@ body {
   border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
+.badge.decor {
+  background-color: rgba(250, 204, 21, 0.2);
+  color: #fde047;
+  border: 1px solid rgba(250, 204, 21, 0.4);
+}
+
 .prop-input {
   background-color: var(--bg-control);
   border: 1px solid var(--border-color);
@@ -552,6 +568,39 @@ body {
 #prop-name {
   width: 160px;
   text-align: left;
+}
+
+#prop-decor-filename {
+  width: 160px;
+  text-align: left;
+}
+
+.prop-select {
+  width: 120px;
+  text-align: left;
+}
+
+#prop-decor-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.decor-drop-zone {
+  border: 1px dashed var(--border-color-focus);
+  border-radius: 0.4rem;
+  padding: 0.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  background-color: rgba(255, 255, 255, 0.02);
+  transition: all var(--transition-fast);
+}
+
+.decor-drop-zone.drag-over {
+  border-color: var(--color-decor);
+  color: #fde047;
+  background-color: rgba(250, 204, 21, 0.08);
 }
 
 .monospace {

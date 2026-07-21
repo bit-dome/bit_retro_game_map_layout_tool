@@ -18,6 +18,14 @@ export function buildObjectFromDrag(state, canvasWidth, canvasHeight) {
     newObject.collision = true;
   } else if (state.activeTool === 'area') {
     newObject.name = 'paper_station';
+  } else if (state.activeTool === 'decor') {
+    newObject.types = 'normal';
+    newObject.n_row = 1;
+    newObject.n_col = 1;
+    newObject.fps = 8;
+    newObject.n_frames = 1;
+    newObject.event_name = '';
+    newObject.filename = '';
   } else if (state.activeTool === 'tunnel') {
     let maxSuffix = 0;
     state.objects.forEach((obj) => {

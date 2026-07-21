@@ -1,4 +1,6 @@
 export function createCanvasRenderer(state, dom) {
+  let animationFrameId = null;
+
   const SPAWN_VISUALS = [
     { shape: 'cross', color: '#ef4444', rgb: '239, 68, 68' },
     { shape: 'triangle', color: '#22c55e', rgb: '34, 197, 94' },
@@ -58,8 +60,18 @@ export function createCanvasRenderer(state, dom) {
       tunnel: {
         color: styles.getPropertyValue('--color-tunnel').trim(),
         rgb: styles.getPropertyValue('--color-tunnel-rgb').trim()
+      },
+      decor: {
+        color: styles.getPropertyValue('--color-decor').trim(),
+        rgb: styles.getPropertyValue('--color-decor-rgb').trim()
       }
     };
+  }
+
+  function sanitizePositiveInt(value, fallback) {
+    const num = Number(value);
+    if (!Number.isFinite(num) || num <= 0) return fallback;
+    return Math.max(1, Math.round(num));
   }
 
   function getSpawnName(obj) {
@@ -174,6 +186,13 @@ export function createCanvasRenderer(state, dom) {
       };
     }
 
+    if (obj.type === 'decor') {
+      return {
+        colorVar: palette.decor.color,
+        colorRgbVar: palette.decor.rgb
+      };
+    }
+
     return {
       colorVar: palette.platform.color,
       colorRgbVar: palette.platform.rgb
@@ -232,10 +251,28 @@ export function createCanvasRenderer(state, dom) {
     }
   }
 
-  function draw() {
+  function updateAnimationLoop(shouldAnimate) {
+    if (shouldAnimate) {
+      if (animationFrameId === null) {
+        animationFrameId = requestAnimationFrame((nowMs) => {
+          animationFrameId = null;
+          draw(nowMs);
+        });
+      }
+      return;
+    }
+
+    if (animationFrameId !== null) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+  }
+
+  function draw(nowMs = performance.now()) {
     const { ctx, paintCanvas } = dom;
     const palette = getCanvasPalette();
     const spawnVisualMap = getSpawnVisualMap(state.objects);
+    let hasAnimatedDecor = false;
 
     ctx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
 
@@ -294,8 +331,57 @@ export function createCanvasRenderer(state, dom) {
       ctx.lineWidth = isSelected ? 3 : 1.5;
 
       if (hasRectangle) {
-        ctx.fillRect(x1, y1, w, h);
-        ctx.strokeRect(x1, y1, w, h);
+        if (obj.type === 'decor') {
+          const drawX = Math.min(x1, x2);
+          const drawY = Math.min(y1, y2);
+          const drawW = Math.abs(w);
+          const drawH = Math.abs(h);
+          const filename = typeof obj.filename === 'string' ? obj.filename.trim() : '';
+          const sprite = filename ? state.decorSpriteCache[filename] : null;
+          const rows = sanitizePositiveInt(obj.n_row, 1);
+          const cols = sanitizePositiveInt(obj.n_col, 1);
+          const totalFrames = Math.max(1, rows * cols);
+          const usedFrames = Math.min(sanitizePositiveInt(obj.n_frames, totalFrames), totalFrames);
+          const fps = sanitizePositiveInt(obj.fps, 8);
+
+          if (sprite && sprite.complete && sprite.naturalWidth > 0 && sprite.naturalHeight > 0) {
+            const srcW = sprite.naturalWidth / cols;
+            const srcH = sprite.naturalHeight / rows;
+            const safeFrameIndex = usedFrames > 1
+              ? Math.floor((nowMs / 1000) * fps) % usedFrames
+              : 0;
+            const frameRow = Math.floor(safeFrameIndex / cols);
+            const frameCol = safeFrameIndex % cols;
+            ctx.drawImage(
+              sprite,
+              frameCol * srcW,
+              frameRow * srcH,
+              srcW,
+              srcH,
+              drawX,
+              drawY,
+              drawW,
+              drawH
+            );
+
+            if (usedFrames > 1 && fps > 0) {
+              hasAnimatedDecor = true;
+            }
+          } else {
+            ctx.fillStyle = `rgba(${colorRgbVar}, ${isSelected ? '0.08' : '0.16'})`;
+            ctx.fillRect(drawX, drawY, drawW, drawH);
+            if (filename) {
+              ctx.fillStyle = colorVar;
+              ctx.font = '10px "Fira Code", monospace';
+              ctx.fillText(filename, drawX + 4, drawY + 14);
+            }
+          }
+
+          ctx.strokeRect(drawX, drawY, drawW, drawH);
+        } else {
+          ctx.fillRect(x1, y1, w, h);
+          ctx.strokeRect(x1, y1, w, h);
+        }
       } else if (hasPoint) {
         const centerX = toCanvasX(Number(obj.coord.x) || 0);
         const centerY = toCanvasY(Number(obj.coord.y) || 0);
@@ -458,6 +544,9 @@ export function createCanvasRenderer(state, dom) {
       } else if (state.activeTool === 'area') {
         ctx.strokeStyle = palette.area.color;
         ctx.fillStyle = `rgba(${palette.area.rgb}, 0.15)`;
+      } else if (state.activeTool === 'decor') {
+        ctx.strokeStyle = palette.decor.color;
+        ctx.fillStyle = `rgba(${palette.decor.rgb}, 0.15)`;
       } else {
         ctx.strokeStyle = palette.tunnel.color;
         ctx.fillStyle = `rgba(${palette.tunnel.rgb}, 0.15)`;
@@ -469,6 +558,8 @@ export function createCanvasRenderer(state, dom) {
       ctx.strokeRect(x1, y1, w, h);
       ctx.setLineDash([]);
     }
+
+    updateAnimationLoop(hasAnimatedDecor);
   }
 
   return { draw };

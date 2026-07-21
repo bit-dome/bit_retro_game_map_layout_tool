@@ -1,4 +1,41 @@
 export function createUI(state, dom, draw, callbacks) {
+  function clampPositiveInt(value, fallback) {
+    const num = Number(value);
+    if (!Number.isFinite(num) || num <= 0) return fallback;
+    return Math.max(1, Math.round(num));
+  }
+
+  function getDecorCellCount(obj) {
+    const rows = clampPositiveInt(obj?.n_row, 1);
+    const cols = clampPositiveInt(obj?.n_col, 1);
+    return rows * cols;
+  }
+
+  function updateDecorEventNameVisibility(obj) {
+    if (!dom.propDecorEventNameContainer) return;
+    const isInteract = obj?.types === 'interact';
+    dom.propDecorEventNameContainer.style.display = isInteract ? 'flex' : 'none';
+  }
+
+  function normalizeDecorFrameConfig(obj) {
+    if (!obj) return;
+
+    obj.n_row = clampPositiveInt(obj.n_row, 1);
+    obj.n_col = clampPositiveInt(obj.n_col, 1);
+    obj.fps = clampPositiveInt(obj.fps, 8);
+    obj.n_frames = Math.min(clampPositiveInt(obj.n_frames, getDecorCellCount(obj)), getDecorCellCount(obj));
+    obj.event_name = typeof obj.event_name === 'string' ? obj.event_name.trim() : '';
+    if (obj.types !== 'interact') {
+      obj.event_name = '';
+    }
+  }
+
+  function getSelectedDecorObject() {
+    if (state.selectedObjectIndex === -1) return null;
+    const obj = state.objects[state.selectedObjectIndex];
+    return obj && obj.type === 'decor' ? obj : null;
+  }
+
   function setTool(toolName) {
     const isPointDrawingTool = state.activeTool === 'polygon' || state.activeTool === 'poly_floor_line';
 
@@ -16,6 +53,7 @@ export function createUI(state, dom, draw, callbacks) {
     dom.toolPolygon.classList.toggle('active', toolName === 'polygon');
     dom.toolPolyFloorLine.classList.toggle('active', toolName === 'poly_floor_line');
     dom.toolTunnel.classList.toggle('active', toolName === 'tunnel');
+    dom.toolDecor.classList.toggle('active', toolName === 'decor');
     dom.toolSpawnPoint.classList.toggle('active', toolName === 'spawn_point');
 
     dom.paintCanvas.style.cursor = toolName === 'select' ? 'default' : 'crosshair';
@@ -58,16 +96,19 @@ export function createUI(state, dom, draw, callbacks) {
       dom.propCollisionContainer.style.display = 'flex';
       dom.propNameContainer.style.display = 'none';
       dom.propTunnelContainer.style.display = 'none';
+      dom.propDecorContainer.style.display = 'none';
       dom.propCollision.textContent = String(obj.collision);
     } else if (obj.type === 'area') {
       dom.propCollisionContainer.style.display = 'none';
       dom.propNameContainer.style.display = 'flex';
       dom.propTunnelContainer.style.display = 'none';
+      dom.propDecorContainer.style.display = 'none';
       dom.propName.value = typeof obj.name === 'string' && obj.name.trim() ? obj.name : 'paper_station';
     } else if (obj.type === 'spawn_point') {
       dom.propCollisionContainer.style.display = 'none';
       dom.propNameContainer.style.display = 'flex';
       dom.propTunnelContainer.style.display = 'none';
+      dom.propDecorContainer.style.display = 'none';
       dom.propName.value = typeof obj.name === 'string' && obj.name.trim()
         ? obj.name
         : (typeof state.lastSpawnName === 'string' && state.lastSpawnName.trim() ? state.lastSpawnName : 'coin');
@@ -75,11 +116,28 @@ export function createUI(state, dom, draw, callbacks) {
       dom.propCollisionContainer.style.display = 'none';
       dom.propNameContainer.style.display = 'none';
       dom.propTunnelContainer.style.display = 'flex';
+      dom.propDecorContainer.style.display = 'none';
       dom.propTunnelId.value = typeof obj.tunnel_name === 'string' ? obj.tunnel_name : '';
+    } else if (obj.type === 'decor') {
+      normalizeDecorFrameConfig(obj);
+      dom.propCollisionContainer.style.display = 'none';
+      dom.propNameContainer.style.display = 'none';
+      dom.propTunnelContainer.style.display = 'none';
+      dom.propDecorContainer.style.display = 'block';
+      dom.propDecorTypes.value = ['normal', 'background', 'interact'].includes(obj.types) ? obj.types : 'normal';
+      dom.propDecorNRow.value = String(obj.n_row);
+      dom.propDecorNCol.value = String(obj.n_col);
+      dom.propDecorFps.value = String(obj.fps);
+      dom.propDecorNFrames.value = String(obj.n_frames);
+      dom.propDecorFilename.value = typeof obj.filename === 'string' ? obj.filename : '';
+      dom.propDecorEventName.value = typeof obj.event_name === 'string' ? obj.event_name : '';
+      updateDecorEventNameVisibility(obj);
     } else {
       dom.propCollisionContainer.style.display = 'none';
       dom.propNameContainer.style.display = 'none';
       dom.propTunnelContainer.style.display = 'none';
+      dom.propDecorContainer.style.display = 'none';
+      updateDecorEventNameVisibility(null);
     }
   }
 
@@ -129,6 +187,146 @@ export function createUI(state, dom, draw, callbacks) {
     }
   }
 
+  function onDecorTypesChange(e) {
+    const obj = getSelectedDecorObject();
+    if (!obj) return;
+
+    const next = e.target.value;
+    obj.types = ['normal', 'background', 'interact'].includes(next) ? next : 'normal';
+    if (obj.types !== 'interact') {
+      obj.event_name = '';
+      dom.propDecorEventName.value = '';
+    }
+    e.target.value = obj.types;
+    updateDecorEventNameVisibility(obj);
+    callbacks.updateJSONTextarea();
+    draw();
+  }
+
+  function onDecorNRowChange(e) {
+    const obj = getSelectedDecorObject();
+    if (!obj) return;
+
+    obj.n_row = clampPositiveInt(e.target.value, 1);
+    obj.n_frames = Math.min(clampPositiveInt(obj.n_frames, getDecorCellCount(obj)), getDecorCellCount(obj));
+    e.target.value = String(obj.n_row);
+    dom.propDecorNFrames.value = String(obj.n_frames);
+    callbacks.updateJSONTextarea();
+    draw();
+  }
+
+  function onDecorNColChange(e) {
+    const obj = getSelectedDecorObject();
+    if (!obj) return;
+
+    obj.n_col = clampPositiveInt(e.target.value, 1);
+    obj.n_frames = Math.min(clampPositiveInt(obj.n_frames, getDecorCellCount(obj)), getDecorCellCount(obj));
+    e.target.value = String(obj.n_col);
+    dom.propDecorNFrames.value = String(obj.n_frames);
+    callbacks.updateJSONTextarea();
+    draw();
+  }
+
+  function onDecorFpsChange(e) {
+    const obj = getSelectedDecorObject();
+    if (!obj) return;
+
+    obj.fps = clampPositiveInt(e.target.value, 8);
+    e.target.value = String(obj.fps);
+    callbacks.updateJSONTextarea();
+    draw();
+  }
+
+  function onDecorNFramesChange(e) {
+    const obj = getSelectedDecorObject();
+    if (!obj) return;
+
+    const maxFrames = getDecorCellCount(obj);
+    obj.n_frames = Math.min(clampPositiveInt(e.target.value, maxFrames), maxFrames);
+    e.target.value = String(obj.n_frames);
+    callbacks.updateJSONTextarea();
+    draw();
+  }
+
+  function onDecorFilenameChange(e) {
+    const obj = getSelectedDecorObject();
+    if (!obj) return;
+
+    obj.filename = typeof e.target.value === 'string' ? e.target.value.trim() : '';
+    if (e.target.value !== obj.filename) {
+      e.target.value = obj.filename;
+    }
+    callbacks.updateJSONTextarea();
+    draw();
+  }
+
+  function onDecorEventNameChange(e) {
+    const obj = getSelectedDecorObject();
+    if (!obj) return;
+
+    if (obj.types !== 'interact') {
+      obj.event_name = '';
+      e.target.value = '';
+      callbacks.updateJSONTextarea();
+      draw();
+      return;
+    }
+
+    obj.event_name = typeof e.target.value === 'string' ? e.target.value.trim() : '';
+    if (e.target.value !== obj.event_name) {
+      e.target.value = obj.event_name;
+    }
+    callbacks.updateJSONTextarea();
+    draw();
+  }
+
+  function onDecorDropOver(e) {
+    const obj = getSelectedDecorObject();
+    if (!obj) return;
+
+    e.preventDefault();
+    dom.propDecorDropzone.classList.add('drag-over');
+  }
+
+  function onDecorDropLeave(e) {
+    e.preventDefault();
+    if (!dom.propDecorDropzone.contains(e.relatedTarget)) {
+      dom.propDecorDropzone.classList.remove('drag-over');
+    }
+  }
+
+  function onDecorDrop(e) {
+    const obj = getSelectedDecorObject();
+    if (!obj) return;
+
+    e.preventDefault();
+    dom.propDecorDropzone.classList.remove('drag-over');
+
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (!file.type.match('image.*')) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const src = typeof evt.target?.result === 'string' ? evt.target.result : '';
+      if (!src) return;
+
+      const img = new Image();
+      img.onload = () => {
+        const filename = file.name.trim();
+        obj.filename = filename;
+        dom.propDecorFilename.value = filename;
+        state.decorSpriteCache[filename] = img;
+        callbacks.updateJSONTextarea();
+        draw();
+      };
+      img.src = src;
+    };
+    reader.readAsDataURL(file);
+  }
+
   function clearAllObjects() {
     if (state.objects.length === 0) return;
 
@@ -148,6 +346,16 @@ export function createUI(state, dom, draw, callbacks) {
     deleteSelectedObject,
     onNameChange,
     onTunnelNameChange,
+    onDecorTypesChange,
+    onDecorNRowChange,
+    onDecorNColChange,
+    onDecorFpsChange,
+    onDecorNFramesChange,
+    onDecorFilenameChange,
+    onDecorEventNameChange,
+    onDecorDropOver,
+    onDecorDropLeave,
+    onDecorDrop,
     clearAllObjects
   };
 }

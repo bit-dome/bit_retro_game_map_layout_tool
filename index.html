@@ -43,6 +43,9 @@
           <button id="tool-tunnel" class="btn tool-btn" data-tool="tunnel">
             <span class="icon">🌀</span> Tunnel
           </button>
+          <button id="tool-decor" class="btn tool-btn" data-tool="decor">
+            <span class="icon">🖼️</span> Decor
+          </button>
           <button id="tool-spawn-point" class="btn tool-btn" data-tool="spawn_point">
             <span class="icon">🎯</span> Spawn Point
           </button>
@@ -135,6 +138,43 @@
             <div class="prop-row" id="prop-tunnel-container" style="display: none;">
               <label class="prop-label" for="prop-tunnel-id">Tunnel Name:</label>
               <input type="text" id="prop-tunnel-id" class="prop-input" value="">
+            </div>
+            <div id="prop-decor-container" style="display: none;">
+              <div class="prop-row">
+                <label class="prop-label" for="prop-decor-types">Decor Type:</label>
+                <select id="prop-decor-types" class="prop-input prop-select">
+                  <option value="normal">normal</option>
+                  <option value="background">background</option>
+                  <option value="interact">interact</option>
+                </select>
+              </div>
+              <div class="prop-row">
+                <label class="prop-label" for="prop-decor-n-row">Rows:</label>
+                <input type="number" id="prop-decor-n-row" class="prop-input" min="1" step="1" value="1">
+              </div>
+              <div class="prop-row">
+                <label class="prop-label" for="prop-decor-n-col">Cols:</label>
+                <input type="number" id="prop-decor-n-col" class="prop-input" min="1" step="1" value="1">
+              </div>
+              <div class="prop-row">
+                <label class="prop-label" for="prop-decor-fps">FPS:</label>
+                <input type="number" id="prop-decor-fps" class="prop-input" min="1" step="1" value="8">
+              </div>
+              <div class="prop-row">
+                <label class="prop-label" for="prop-decor-n-frames">Frames:</label>
+                <input type="number" id="prop-decor-n-frames" class="prop-input" min="1" step="1" value="1">
+              </div>
+              <div class="prop-row">
+                <label class="prop-label" for="prop-decor-filename">Filename:</label>
+                <input type="text" id="prop-decor-filename" class="prop-input" value="" placeholder="sprite.png">
+              </div>
+              <div class="prop-row" id="prop-decor-event-name-container" style="display: none;">
+                <label class="prop-label" for="prop-decor-event-name">Event:</label>
+                <input type="text" id="prop-decor-event-name" class="prop-input" value="" placeholder="event_name">
+              </div>
+              <div class="decor-drop-zone" id="prop-decor-dropzone">
+                Drop sprite sheet here
+              </div>
             </div>
             <div class="prop-row">
               <span class="prop-label">Coords:</span>
